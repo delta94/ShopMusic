@@ -5,8 +5,9 @@ import { View, Text, StyleSheet, Dimensions, StatusBar, ImageBackground } from '
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import TrackPlayer, { Track } from 'react-native-track-player';
 import { useSelector } from 'react-redux';
-import { RootState } from 'store';
+import RNBootSplash from 'react-native-bootsplash';
 
+import { RootState } from 'store';
 import { Colors } from 'styles/global.style';
 import Palyer from './Palyer';
 
@@ -36,6 +37,7 @@ const HomeScreen = () => {
             ],
             compactCapabilities: [TrackPlayer.CAPABILITY_PLAY, TrackPlayer.CAPABILITY_PAUSE],
         });
+        RNBootSplash.hide();
     }, []);
 
     useEffect(() => {
