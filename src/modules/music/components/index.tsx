@@ -1,5 +1,5 @@
 import { NavigationProp, useFocusEffect } from '@react-navigation/native';
-import React, { FC, useCallback, useRef } from 'react';
+import React, { FC, useCallback } from 'react';
 import { FlatList, StatusBar, StyleSheet, View } from 'react-native';
 import ItemMusic from './ItemMusic';
 
@@ -50,7 +50,7 @@ const MusicScreen: FC<IProps> = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-    scrollView: { paddingTop: 10 },
+    scrollView: { paddingTop: 10, flex: 1 },
     viewListMusic: { marginTop: 35 },
     itemSeparatorComponent: { height: 10 },
 });

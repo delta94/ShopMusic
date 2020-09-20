@@ -48,8 +48,7 @@ const Handler = (dispatch: AppDispatch) => {
         dispatch(actionsHome.setLastIdTrack(track));
     });
 
-    TrackPlayer.addEventListener('playback-error', error => {
-        console.log(error);
+    TrackPlayer.addEventListener('playback-error', () => {
         Alert.alert('Something went wrong. Please try again later.');
     });
 };

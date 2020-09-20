@@ -9,6 +9,9 @@ import MusicScreen from 'modules/music/components';
 import ListScreen from 'modules/list/components';
 import MusicComponent from 'modules/music/components/MusicComponent';
 import { RootState } from 'store';
+import ProfileScreen from 'modules/profile/screens/ProfileScreen';
+import EditProfileScreen from 'modules/profile/screens/EditProfileScreen';
+import { Colors } from 'styles/global.style';
 
 enableScreens();
 const Stack = createNativeStackNavigator();
@@ -25,6 +28,17 @@ const MusicScreenBottomTab = () => {
                     component={MusicScreen}
                 />
                 <Stack.Screen options={{ headerShown: false }} name="ListScreen" component={ListScreen} />
+                <Stack.Screen options={{ headerShown: false }} name="ProfileScreen" component={ProfileScreen} />
+                <Stack.Screen
+                    options={{
+                        title: 'Edit Profile',
+                        headerStyle: { backgroundColor: Colors.white },
+                        headerTintColor: Colors.subtle,
+                        stackPresentation: 'modal',
+                    }}
+                    name="EditProfileScreen"
+                    component={EditProfileScreen}
+                />
             </Stack.Navigator>
 
             {Object.keys(track).length > 0 && <MusicComponent />}

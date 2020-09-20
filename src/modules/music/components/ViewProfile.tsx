@@ -1,12 +1,18 @@
-import ImageCustom from 'components/ImageCustom';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableHighlight } from 'react-native';
 import { Icon } from 'react-native-elements';
+
+import NavigationService from 'navigation/NavigationService';
+import ImageCustom from 'components/ImageCustom';
 import { Colors } from 'styles/global.style';
 
 const ViewProfile = () => {
+    const goToProfile = useCallback(() => {
+        NavigationService.navigate('ProfileScreen');
+    }, []);
+
     return (
-        <TouchableHighlight onPress={() => {}} underlayColor="#d6d6d6">
+        <TouchableHighlight onPress={goToProfile} underlayColor="#d6d6d6">
             <View style={styles.container}>
                 <ImageCustom
                     source={{
