@@ -6,6 +6,7 @@ import { Icon } from 'react-native-elements';
 
 import { Colors } from 'styles/global.style';
 import HomeScreenBottomTab from './components/HomeScreenBottomTab';
+import MusicScreenBottomTab from './components/MusicScreenBottomTab';
 
 enableScreens();
 const Stack = createBottomTabNavigator();
@@ -35,6 +36,16 @@ const BottomTab = () => {
                 }}
                 name="HomeScreen"
                 component={HomeScreenBottomTab}
+            />
+            <Stack.Screen
+                options={{
+                    tabBarIcon: ({ focused, color }) => (
+                        <Icon type="font-awesome" size={25} color={focused ? Colors.primary : color} name="music" />
+                    ),
+                    title: 'Music',
+                }}
+                name="MusicScreen"
+                component={MusicScreenBottomTab}
             />
         </Stack.Navigator>
     );

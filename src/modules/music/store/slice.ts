@@ -10,7 +10,6 @@ interface State {
     duration: number;
     shuffle: boolean;
     position: number;
-    lastIdTrack: number | string;
     queue: Track[];
 }
 
@@ -21,7 +20,6 @@ const initialState: State = {
     duration: 0,
     shuffle: false,
     position: 0,
-    lastIdTrack: 0,
     queue: [],
 };
 
@@ -31,9 +29,6 @@ const home = createSlice({
     reducers: {
         setUserPlaying: (state, { payload }) => {
             state.playing = payload;
-        },
-        setLastIdTrack: (state, { payload }) => {
-            state.lastIdTrack = payload;
         },
     },
     extraReducers: builder => {
