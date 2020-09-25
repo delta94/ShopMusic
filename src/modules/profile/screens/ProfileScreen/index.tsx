@@ -34,6 +34,10 @@ const ProfileScreen: FC<IProps> = ({ navigation }) => {
                     <Icon type="ant-design" name="leftcircle" color={Colors.white} size={35} />
                 </TouchableOpacity>
 
+                <TouchableOpacity style={styles.viewLogout}>
+                    <Icon type="material-icon" name="logout" color={Colors.white} size={35} />
+                </TouchableOpacity>
+
                 <ScrollView style={styles.scrollView} automaticallyAdjustContentInsets>
                     <View style={styles.viewImage}>
                         <ImageCustom
@@ -72,6 +76,12 @@ const styles = StyleSheet.create({
         paddingVertical: 5,
     },
     textEditProfile: { color: Colors.white, textTransform: 'uppercase', fontSize: 12, fontWeight: '700' },
+    viewLogout: {
+        position: 'absolute',
+        right: 15,
+        top: 50,
+        zIndex: 2,
+    },
 });
 
 export default memo(ProfileScreen);

@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "671699132166",
+    "firebase_url": "https://shop-music.firebaseio.com",
+    "project_id": "shop-music",
+    "storage_bucket": "shop-music.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:671699132166:android:81386613c381a946434887",
+        "android_client_info": {
+          "package_name": "com.megaads.shopmusic"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "671699132166-7akiqaic5q8p7bcbjrk7h9nll5fudhhj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDZMDlKy_PjBcASZKHEro9dqwDy8j2hCD4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "671699132166-7akiqaic5q8p7bcbjrk7h9nll5fudhhj.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

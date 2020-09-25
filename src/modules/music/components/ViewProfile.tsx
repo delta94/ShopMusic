@@ -1,15 +1,19 @@
 import React, { useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableHighlight } from 'react-native';
 import { Icon } from 'react-native-elements';
+import { useSelector } from 'react-redux';
 
 import NavigationService from 'navigation/NavigationService';
 import ImageCustom from 'components/ImageCustom';
 import { Colors } from 'styles/global.style';
+import { RootState } from 'store';
 
 const ViewProfile = () => {
+    const isLogin = useSelector<RootState, boolean>(state => state.auth.isLogin);
+
     const goToProfile = useCallback(() => {
-        NavigationService.navigate('ProfileScreen');
-    }, []);
+        isLogin ? NavigationService.navigate('ProfileScreen') : NavigationService.navigate('LoginScreen');
+    }, [isLogin]);
 
     return (
         <TouchableHighlight onPress={goToProfile} underlayColor="#d6d6d6">
@@ -24,7 +28,7 @@ const ViewProfile = () => {
                 />
 
                 <View style={styles.viewContainer}>
-                    <Text style={styles.textName}>Ngô Ngọc Đạt</Text>
+                    <Text style={styles.textName}>{isLogin ? 'Ngô Ngọc Đạt' : 'Đăng nhập'}</Text>
                     <Text style={styles.textViewProfile}>Xem thông tin</Text>
                 </View>
 

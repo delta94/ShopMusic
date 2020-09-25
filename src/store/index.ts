@@ -3,9 +3,11 @@ import AsyncStorage from '@react-native-community/async-storage';
 import { persistStore, persistReducer } from 'redux-persist';
 
 import { reducer as homeReducer } from 'modules/home/store';
+import { reducer as authReducer } from 'modules/auth/store';
 
 const rootReducer = combineReducers({
     home: homeReducer,
+    auth: authReducer,
 });
 
 const persistConfig = {
