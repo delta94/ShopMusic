@@ -2,15 +2,23 @@ import { NavigationProp, useFocusEffect } from '@react-navigation/native';
 import React, { FC, Fragment, memo, useCallback } from 'react';
 import { View, Text, ScrollView, StyleSheet, ImageBackground, StatusBar, TouchableOpacity } from 'react-native';
 import { Icon } from 'react-native-elements';
+import { useDispatch, useSelector } from 'react-redux';
 
 import { Colors } from 'styles/global.style';
 import ImageCustom from 'components/ImageCustom';
+import { actions as actionsAuth } from 'modules/auth/store';
+import { RootState } from 'store';
+import { User } from 'types/Auth/AuthResponse';
 
 interface IProps {
     navigation: NavigationProp<any>;
 }
 
 const ProfileScreen: FC<IProps> = ({ navigation }) => {
+    const dispatch = useDispatch();
+    const user = useSelector<RootState, User>(state => state.auth.user);
+    const isLogin = useSelector<RootState, boolean>(state => state.auth.isLogin);
+
     const changeStatusBar = useCallback(() => {
         StatusBar.setBarStyle('light-content', true);
     }, []);
@@ -21,20 +29,26 @@ const ProfileScreen: FC<IProps> = ({ navigation }) => {
         navigation.navigate('EditProfileScreen');
     }, [navigation]);
 
+    const handleLogout = useCallback(() => {
+        dispatch(actionsAuth.setLogin(false));
+        navigation.goBack();
+    }, [dispatch, navigation]);
+
     return (
         <Fragment>
             <ImageBackground
                 style={styles.container}
                 blurRadius={100}
                 source={{
-                    uri:
-                        'https://photo-resize-zmp3.zadn.vn/w480_r1x1_jpeg/cover/2/c/a/a/2caa245f831832e8c1a2bcbc9f7673ba.jpg',
+                    uri: isLogin
+                        ? user.info.avatar
+                        : 'https://photo-resize-zmp3.zadn.vn/w480_r1x1_jpeg/cover/2/c/a/a/2caa245f831832e8c1a2bcbc9f7673ba.jpg',
                 }}>
                 <TouchableOpacity onPress={navigation.goBack} style={styles.iconBack}>
                     <Icon type="ant-design" name="leftcircle" color={Colors.white} size={35} />
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.viewLogout}>
+                <TouchableOpacity onPress={handleLogout} style={styles.viewLogout}>
                     <Icon type="material-icon" name="logout" color={Colors.white} size={35} />
                 </TouchableOpacity>
 
@@ -42,14 +56,15 @@ const ProfileScreen: FC<IProps> = ({ navigation }) => {
                     <View style={styles.viewImage}>
                         <ImageCustom
                             source={{
-                                uri:
-                                    'https://photo-resize-zmp3.zadn.vn/w480_r1x1_jpeg/cover/2/c/a/a/2caa245f831832e8c1a2bcbc9f7673ba.jpg',
+                                uri: isLogin
+                                    ? user.info.avatar
+                                    : 'https://photo-resize-zmp3.zadn.vn/w480_r1x1_jpeg/cover/2/c/a/a/2caa245f831832e8c1a2bcbc9f7673ba.jpg',
                             }}
                             resizeMode="cover"
                             style={styles.image}
                         />
 
-                        <Text style={styles.textName}>Ngô Ngọc Đạt</Text>
+                        <Text style={styles.textName}>{user.info.fullname}</Text>
 
                         <TouchableOpacity onPress={goToEditProfilel} style={styles.viewEditProfile}>
                             <Text style={styles.textEditProfile}>EDIT PROFILE</Text>

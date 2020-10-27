@@ -1,3 +1,4 @@
+import { Song } from 'types/Songs/SongResponse';
 import { Staff } from 'types/Staff/StaffResponse';
 
 export interface HomeResponse {
@@ -6,4 +7,10 @@ export interface HomeResponse {
     estimatedContractStaffs: Staff[];
     increaseSalaryContractStaffs: any[];
     staffs: Staff[];
+}
+
+export interface ResponesDetailSong {
+    code: number;
+    message: string;
+    data: Song;
 }

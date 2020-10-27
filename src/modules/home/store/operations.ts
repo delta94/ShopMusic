@@ -10,7 +10,9 @@ export const playbackState = createAsyncThunk('home/playbackState', () => TrackP
 
 export const playbackTrack = createAsyncThunk('home/playbackTrack', async () => {
     const trackId = await TrackPlayer.getCurrentTrack();
-    return TrackPlayer.getTrack(trackId);
+    const res = await TrackPlayer.getTrack(trackId);
+    if (res) return res;
+    return Promise.reject();
 });
 
 export const getDuration = createAsyncThunk('home/getDuration', () => TrackPlayer.getDuration());
@@ -18,3 +20,7 @@ export const getDuration = createAsyncThunk('home/getDuration', () => TrackPlaye
 export const getPosition = createAsyncThunk('home/getPosition', () => TrackPlayer.getPosition());
 
 export const getQueue = createAsyncThunk('home/getQueue', () => TrackPlayer.getQueue());
+
+export const stopMusic = createAsyncThunk('home/stopMusic', services.stopMusic);
+
+export const getDetailSong = createAsyncThunk('home/getDetailSong', services.getDetailSong);

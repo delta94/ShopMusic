@@ -1,58 +1,36 @@
-export interface SigninResponse {
-    status: string;
-    access_token: string;
-    user: User;
-    roles: Role[];
+export interface RegisterResult {
+    code: number;
+    message: string;
+    data: User;
 }
 
 export interface User {
-    id: number;
-    username: string;
-    type: string;
-    first_name: any;
-    last_name: any;
-    email: string;
-    status: string;
-    address: any;
-    phone: any;
-    birthday: any;
-    role_id: any;
+    account: string;
+    password: string;
+    create_at: any;
+    enable: boolean;
+    ipAddress: any;
+    info: Info;
+    uuid: string;
+}
+
+export interface Info {
+    fullname: string;
+    bod: any;
     gender: any;
-    code: string;
-    full_name: string;
-    active_time: string;
-    location_id: any;
-    ndepartments: Ndepartment[];
-    departments: Department[];
+    avatar: any;
+    uuid: string;
 }
 
-export interface Ndepartment {
-    id: number;
-    staff_id: string;
-    department_id: string;
-    create_time: string;
-    update_time: any;
+export interface LoginResult {
+    code: number;
+    message: string;
+    data: LoginInReponse;
 }
 
-export interface Department {
-    id: number;
-    name: string;
-    parent_id: string;
-    manager_id: string;
-    staff_qtty: string;
-    description: string;
-    create_time: string;
-    update_time: string;
-    company_id: string;
-    pivot: Pivot;
-}
-
-export interface Pivot {
-    staff_id: string;
-    department_id: string;
-}
-
-export interface Role {
-    id: string;
-    name: string;
+export interface LoginInReponse {
+    jwttoken: string;
+    refreshToken: any;
+    user: User;
+    duringTime: number;
 }

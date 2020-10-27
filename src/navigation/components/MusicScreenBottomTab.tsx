@@ -14,6 +14,7 @@ import ProfileScreen from 'modules/profile/screens/ProfileScreen';
 import EditProfileScreen from 'modules/profile/screens/EditProfileScreen';
 import { Colors } from 'styles/global.style';
 import NavigationService from 'navigation/NavigationService';
+import { Platform } from 'react-native';
 
 enableScreens();
 const Stack = createNativeStackNavigator();
@@ -40,7 +41,7 @@ const MusicScreenBottomTab = () => {
                         title: 'Settings',
                         headerLargeTitle: true,
                         headerLargeTitleHideShadow: true,
-                        headerTintColor: '#000000',
+                        headerTintColor: Platform.OS === 'android' ? Colors.white : '#000000',
                     }}
                     name="MusicScreen"
                     component={MusicScreen}

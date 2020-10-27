@@ -1,14 +1,30 @@
 /* eslint-disable react-native/no-inline-styles */
 import { NavigationProp, useFocusEffect } from '@react-navigation/native';
 import React, { FC, Fragment, memo, useCallback, useState } from 'react';
-import { View, Text, StatusBar, StyleSheet, TouchableOpacity, ImageSourcePropType } from 'react-native';
+import {
+    View,
+    Text,
+    StatusBar,
+    StyleSheet,
+    TouchableOpacity,
+    ImageSourcePropType,
+    Platform,
+    Alert,
+} from 'react-native';
 import { Button, Input } from 'react-native-elements';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ImagePicker, { ImagePickerOptions } from 'react-native-image-picker';
+import { useDispatch, useSelector } from 'react-redux';
+import { unwrapResult } from '@reduxjs/toolkit';
+import debounce from 'lodash/debounce';
 
 import { useIOS13 } from 'hooks/useIOS13';
 import { Colors } from 'styles/global.style';
 import ImageCustom from 'components/ImageCustom';
+import { RootState } from 'store';
+import { User } from 'types/Auth/AuthResponse';
+import { actions as actionsAuth } from 'modules/auth/store';
+import LoadingOverley from 'components/LoadingOverley';
 
 interface IProps {
     navigation: NavigationProp<any>;
@@ -27,8 +43,13 @@ const options: ImagePickerOptions = {
 };
 
 const EditProfileScreen: FC<IProps> = ({ navigation }) => {
-    const [name, setName] = useState<string>('Ngô Ngọc Đạt');
+    const dispatch = useDispatch();
+    const user = useSelector<RootState, User>(state => state.auth.user);
+    const isLogin = useSelector<RootState, boolean>(state => state.auth.isLogin);
+    const [name, setName] = useState<string>(user.info.fullname);
     const [sourceImage, setSourceImage] = useState<ImageSourcePropType>();
+    const [loading, setLoading] = useState<boolean>(false);
+
     const { top } = useSafeAreaInsets();
     const isIOS13 = useIOS13();
 
@@ -39,22 +60,51 @@ const EditProfileScreen: FC<IProps> = ({ navigation }) => {
     useFocusEffect(changeStatusBar);
 
     const showImagePicker = useCallback(() => {
-        ImagePicker.showImagePicker(options, response => {
+        ImagePicker.showImagePicker(options, async response => {
             if (response.didCancel) {
-                console.log('User cancelled image picker');
             } else if (response.error) {
-                console.log('ImagePicker Error: ', response.error);
             } else if (response.customButton) {
-                console.log('User tapped custom button: ', response.customButton);
             } else {
                 const source = { uri: 'data:image/jpeg;base64,' + response.data };
                 setSourceImage(source);
+                setLoading(true);
+                try {
+                    await dispatch<any>(
+                        actionsAuth.updateAvatar({
+                            uri: Platform.OS === 'ios' ? response.uri.replace('file://', '') : response.uri,
+                            size: response.fileSize,
+                            height: response.height,
+                            width: response.width,
+                            type: response.type,
+                            name: response.fileName ? response.fileName : `${user.info.uuid}.png`,
+                        }),
+                    ).then(unwrapResult);
+                    debounce(() => Alert.alert('Thông báo', 'Chỉnh sửa ảnh thành công'), 500)();
+                } catch {
+                    debounce(() => Alert.alert('Thông báo', 'Chỉnh sửa ảnh lỗi'), 500)();
+                } finally {
+                    setLoading(false);
+                }
             }
         });
-    }, []);
+    }, [dispatch, user]);
+
+    const handlePress = useCallback(async () => {
+        setLoading(true);
+        try {
+            await dispatch<any>(actionsAuth.updateProfile({ ...user.info, fullname: name })).then(unwrapResult);
+            debounce(() => Alert.alert('Thông báo', 'Cập nhật profile thành công'), 500)();
+        } catch {
+            debounce(() => Alert.alert('Thông báo', 'Cập nhật profile lỗi'), 500)();
+        } finally {
+            setLoading(false);
+        }
+    }, [dispatch, name, user.info]);
 
     return (
         <Fragment>
+            <LoadingOverley visible={loading} />
+
             {isIOS13 && (
                 <View style={styles.viewHeader}>
                     <Button
@@ -68,6 +118,7 @@ const EditProfileScreen: FC<IProps> = ({ navigation }) => {
                     <Button
                         disabled={!name}
                         type="clear"
+                        onPress={handlePress}
                         buttonStyle={styles.buttonStyle}
                         titleStyle={styles.titleStyle}
                         title="Save"
@@ -82,8 +133,9 @@ const EditProfileScreen: FC<IProps> = ({ navigation }) => {
                             sourceImage
                                 ? sourceImage
                                 : {
-                                      uri:
-                                          'https://photo-resize-zmp3.zadn.vn/w480_r1x1_jpeg/cover/2/c/a/a/2caa245f831832e8c1a2bcbc9f7673ba.jpg',
+                                      uri: isLogin
+                                          ? user.info.avatar
+                                          : 'https://photo-resize-zmp3.zadn.vn/w480_r1x1_jpeg/cover/2/c/a/a/2caa245f831832e8c1a2bcbc9f7673ba.jpg',
                                   }
                         }
                         resizeMode="cover"

@@ -6,7 +6,7 @@ export const instance = (baseURL: string): AxiosInstance => {
     const axiosInstance = axios.create({
         baseURL,
         paramsSerializer: params => qs.stringify(params, { arrayFormat: 'repeat' }),
-        timeout: 5000,
+        timeout: 10000,
     });
 
     axiosInstance.interceptors.request.use(
@@ -30,7 +30,7 @@ export const instance = (baseURL: string): AxiosInstance => {
     return axiosInstance;
 };
 
-export const apiAxios = instance('https://hrm-api.megaads.vn/api/');
+export const apiAxios = instance('http://103.124.94.189:9333/');
 
 export function setHeaders(params: any): void {
     const newHeaders = {

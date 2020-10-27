@@ -1,20 +1,28 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
-import TrackPlayer from 'react-native-track-player';
 
 import * as services from './services';
-import { HomeResponse } from 'types/Home/HomeResponse';
+import { LoginInReponse, User } from 'types/Auth/AuthResponse';
+import { RegisterRequest, LoginRequest } from 'types/Auth/AuthRequest';
+import { RootState } from 'store';
 
-export const fetchStatistic = createAsyncThunk<HomeResponse>('home/fetchStatistic', () => services.fetchStatistic());
+export const register = createAsyncThunk<User, RegisterRequest>('auth/register', (body: RegisterRequest) =>
+    services.register(body),
+);
 
-export const playbackState = createAsyncThunk('home/playbackState', () => TrackPlayer.getState());
+export const login = createAsyncThunk<LoginInReponse, LoginRequest>('auth/login', services.login);
 
-export const playbackTrack = createAsyncThunk('home/playbackTrack', async () => {
-    const trackId = await TrackPlayer.getCurrentTrack();
-    return TrackPlayer.getTrack(trackId);
+export const checkLoginAccount = createAsyncThunk('auth/checkLoginAccount', services.checkLoginAccount);
+
+export const updateAvatar = createAsyncThunk('profile/updateAvatar', async (file: any, thunkApi) => {
+    const state: RootState = thunkApi.getState();
+
+    try {
+        const urlAvatar = await services.updateAvatar(file);
+        const { fullname, bod, gender } = state.auth.user.info;
+        return services.updateProfile({ fullname, bod, gender, avatar: urlAvatar });
+    } catch (error) {
+        return Promise.reject(error);
+    }
 });
 
-export const getDuration = createAsyncThunk('home/getDuration', () => TrackPlayer.getDuration());
-
-export const getPosition = createAsyncThunk('home/getPosition', () => TrackPlayer.getPosition());
-
-export const getQueue = createAsyncThunk('home/getQueue', () => TrackPlayer.getQueue());
+export const updateProfile = createAsyncThunk('auth/updateProfile', services.updateProfile);

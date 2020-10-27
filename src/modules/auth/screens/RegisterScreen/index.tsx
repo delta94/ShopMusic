@@ -1,18 +1,20 @@
 import { useFormik } from 'formik';
 import React, { FC, memo, MutableRefObject, useCallback, useEffect, useRef, useState } from 'react';
-import { StyleSheet, TouchableWithoutFeedback, View } from 'react-native';
+import { Alert, StyleSheet, TouchableWithoutFeedback, View } from 'react-native';
 import * as Yup from 'yup';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button, Input, Icon } from 'react-native-elements';
 import { useDispatch, useSelector } from 'react-redux';
 import { NavigationProp } from '@react-navigation/native';
+import debounce from 'lodash/debounce';
+import { unwrapResult } from '@reduxjs/toolkit';
 
 import { Colors } from 'styles/global.style';
 import { actions as actionsAuth } from '../../store';
 import { RootState } from 'store';
 
 const validationSchema = Yup.object({
-    email: Yup.string().required('Vui lòng nhập email').email('Vui lòng nhập đúng định dạng email'),
+    email: Yup.string().required('Vui lòng nhập email'),
     password: Yup.string().required('Vui lòng nhập mật khẩu ').min(6, 'Mật khẩu phải lớn hơn 6 ký tự'),
     password_confirm: Yup.string()
         .required('Vui lòng nhập mật khẩu xác nhận')
@@ -44,11 +46,27 @@ const RegisterScreen: FC<IProps> = ({ navigation }) => {
         !!isLogin && navigation.navigate('BottomTab');
     }, [isLogin, navigation]);
 
-    const onSubmitForm = useCallback(async valuesForm => {
-        setLoading(true);
-        // await dispatch(actionsAuth.signIn(valuesForm));
-        setLoading(false);
-    }, []);
+    const onSubmitForm = useCallback(
+        async (valuesForm: typeof initialValues) => {
+            setLoading(true);
+            try {
+                await dispatch<any>(
+                    actionsAuth.register({
+                        account: valuesForm.email,
+                        password: valuesForm.password,
+                        info: { fullname: valuesForm.name },
+                    }),
+                ).then(unwrapResult);
+                debounce(() => Alert.alert('Thông báo', 'Đăng ký thành công!'), 500)();
+                navigation.goBack();
+            } catch {
+                debounce(() => Alert.alert('Thông báo', 'Đăng ký lỗi!'), 500)();
+            } finally {
+                setLoading(false);
+            }
+        },
+        [dispatch, navigation],
+    );
 
     const { submitForm, handleBlur, handleChange, errors, values } = useFormik<typeof initialValues>({
         initialValues,
@@ -75,7 +93,7 @@ const RegisterScreen: FC<IProps> = ({ navigation }) => {
                 onBlur={handleBlur('email')}
                 selectionColor={Colors.subtle}
                 style={styles.viewInput}
-                label="Email"
+                label="Username"
                 errorStyle={styles.errorStyle}
                 labelStyle={styles.labelStyle}
                 errorMessage={errors.email ? errors.email : undefined}
@@ -84,7 +102,6 @@ const RegisterScreen: FC<IProps> = ({ navigation }) => {
 
             <Input
                 ref={refInputName as MutableRefObject<Input>}
-                autoFocus
                 returnKeyType="next"
                 autoCapitalize="none"
                 value={values.name}

@@ -1,5 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { State as StateTrack, Track } from 'react-native-track-player';
+import { Song } from 'types/Songs/SongResponse';
 
 import * as operations from './operations';
 
@@ -12,6 +13,7 @@ interface State {
     position: number;
     lastIdTrack: number | string;
     queue: Track[];
+    detailSong: Song;
 }
 
 const initialState: State = {
@@ -23,6 +25,7 @@ const initialState: State = {
     position: 0,
     lastIdTrack: 0,
     queue: [],
+    detailSong: {} as Song,
 };
 
 const home = createSlice({
@@ -65,6 +68,12 @@ const home = createSlice({
         builder.addCase(operations.getQueue.rejected, () => {});
         builder.addCase(operations.getQueue.fulfilled, (state, { payload }) => {
             state.queue = payload;
+        });
+        //
+        builder.addCase(operations.getDetailSong.pending, () => {});
+        builder.addCase(operations.getDetailSong.rejected, () => {});
+        builder.addCase(operations.getDetailSong.fulfilled, (state, { payload }) => {
+            state.detailSong = payload;
         });
     },
 });

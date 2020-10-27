@@ -4,7 +4,7 @@ import TrackPlayer from 'react-native-track-player';
 import { actions as actionsHome } from 'modules/home/store';
 import { AppDispatch } from 'store';
 
-const Handler = (dispatch: AppDispatch) => {
+async function Handler(dispatch: AppDispatch) {
     TrackPlayer.addEventListener('remote-play', () => dispatch(actionsHome.setUserPlaying(true)));
 
     TrackPlayer.addEventListener('remote-pause', () => dispatch(actionsHome.setUserPlaying(false)));
@@ -48,9 +48,9 @@ const Handler = (dispatch: AppDispatch) => {
         dispatch(actionsHome.setLastIdTrack(track));
     });
 
-    TrackPlayer.addEventListener('playback-error', () => {
-        Alert.alert('Something went wrong. Please try again later.');
+    TrackPlayer.addEventListener('playback-error', err => {
+        console.log('err', err);
     });
-};
+}
 
 export default (dispatch: AppDispatch) => Handler.bind(null, dispatch);

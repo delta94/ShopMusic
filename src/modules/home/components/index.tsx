@@ -1,48 +1,57 @@
 import { useFocusEffect } from '@react-navigation/native';
 import ImageCustom from 'components/ImageCustom';
-import React, { memo, useCallback, useEffect } from 'react';
-import { View, Text, StyleSheet, Dimensions, StatusBar, ImageBackground } from 'react-native';
+import React, { memo, useCallback, useEffect, useState } from 'react';
+import { View, Text, StyleSheet, Dimensions, StatusBar, ImageBackground, TouchableOpacity } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import TrackPlayer, { Track } from 'react-native-track-player';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import RNBootSplash from 'react-native-bootsplash';
 
 import { RootState } from 'store';
 import { Colors } from 'styles/global.style';
 import Palyer from './Palyer';
+import { actions as actionsList } from 'modules/list/store';
+import ModalSelectPrice from 'components/ModalSelectPrice';
+import NavigationService from 'navigation/NavigationService';
 
 const { width } = Dimensions.get('window');
 
 const HomeScreen = () => {
+    const dispatch = useDispatch();
+    const track = useSelector<RootState, Track>(state => state.home.track);
+    const isLogin = useSelector<RootState, boolean>(state => state.auth.isLogin);
+    const [isVisible, setIsVisible] = useState<boolean>(false);
+
+    const { top } = useSafeAreaInsets();
+
     const changeStatusBar = useCallback(() => {
         StatusBar.setBarStyle('light-content', true);
     }, []);
 
     useFocusEffect(changeStatusBar);
 
-    const { top } = useSafeAreaInsets();
-
-    const track = useSelector<RootState, Track>(state => state.home.track);
-
     const setup = useCallback(async () => {
         await TrackPlayer.setupPlayer({});
-        await TrackPlayer.updateOptions({
-            stopWithApp: true,
-            capabilities: [
-                TrackPlayer.CAPABILITY_PLAY,
-                TrackPlayer.CAPABILITY_PAUSE,
-                TrackPlayer.CAPABILITY_SKIP_TO_NEXT,
-                TrackPlayer.CAPABILITY_SKIP_TO_PREVIOUS,
-                TrackPlayer.CAPABILITY_STOP,
-            ],
-            compactCapabilities: [TrackPlayer.CAPABILITY_PLAY, TrackPlayer.CAPABILITY_PAUSE],
-        });
+        await TrackPlayer.updateOptions({ stopWithApp: true });
         RNBootSplash.hide();
     }, []);
 
     useEffect(() => {
         setup();
     }, [setup]);
+
+    useEffect(() => {
+        dispatch(actionsList.fetchSongsDemo(0));
+    }, [dispatch]);
+
+    const openModal = useCallback(() => {
+        if (!isLogin) {
+            NavigationService.navigate('LoginScreen');
+            return;
+        }
+
+        setIsVisible(true);
+    }, [isLogin]);
 
     return (
         <ImageBackground
@@ -67,9 +76,17 @@ const HomeScreen = () => {
 
             <View>
                 <Text style={styles.songTitle}>{track.title}</Text>
-                <Text style={styles.nameProducer}>{track.artist}</Text>
+                <Text numberOfLines={1} style={styles.nameProducer}>
+                    {track.artist}
+                </Text>
             </View>
             <Palyer />
+
+            <TouchableOpacity onPress={openModal} style={styles.buttonBought}>
+                <Text style={styles.textBought}>Mua</Text>
+            </TouchableOpacity>
+
+            <ModalSelectPrice uuid={track.id} isVisible={isVisible} setIsVisible={setIsVisible} />
         </ImageBackground>
     );
 };
@@ -93,7 +110,24 @@ const styles = StyleSheet.create({
     },
     viewImage: { alignItems: 'center' },
     songTitle: { fontSize: 20, textAlign: 'center', color: Colors.white, fontWeight: '800' },
-    nameProducer: { marginTop: 10, fontSize: 18, textAlign: 'center', color: Colors.white, fontWeight: '700' },
+    nameProducer: {
+        marginTop: 10,
+        fontSize: 18,
+        textAlign: 'center',
+        color: Colors.white,
+        fontWeight: '700',
+        paddingHorizontal: 15,
+    },
+    buttonBought: {
+        paddingHorizontal: 10,
+        paddingVertical: 2,
+        backgroundColor: Colors.primary,
+        borderRadius: 10,
+        position: 'absolute',
+        bottom: 20,
+        right: 15,
+    },
+    textBought: { fontWeight: '500', color: Colors.white, fontSize: 15 },
 });
 
 export default memo(HomeScreen);

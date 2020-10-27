@@ -4,10 +4,12 @@ import { persistStore, persistReducer } from 'redux-persist';
 
 import { reducer as homeReducer } from 'modules/home/store';
 import { reducer as authReducer } from 'modules/auth/store';
+import { reducer as listReducer } from 'modules/list/store';
 
 const rootReducer = combineReducers({
     home: homeReducer,
     auth: authReducer,
+    list: listReducer,
 });
 
 const persistConfig = {

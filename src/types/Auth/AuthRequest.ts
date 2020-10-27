@@ -1,8 +1,16 @@
-export interface SigninRequest {
-    username: string;
+export interface RegisterRequest {
+    account: string;
     password: string;
+    info: Info;
 }
 
-export interface ForgetPassword {
-    email: string;
+export interface Info {
+    fullname: string;
+    bod?: string;
+    gender?: number;
+}
+
+export interface LoginRequest {
+    username: string;
+    password: string;
 }

@@ -12,6 +12,7 @@ import LoginScreen from 'modules/auth/screens/LoginScreen';
 import RegisterScreen from 'modules/auth/screens/RegisterScreen';
 import ChatScreen from 'modules/chat/components';
 import { useMessaging } from 'hooks/useMessaging';
+import { useSocket } from 'hooks/useSocket';
 
 enableScreens();
 const Stack = createNativeStackNavigator();
@@ -29,6 +30,8 @@ const getActiveRouteName = (state: any): string => {
 
 const NavigationApp = () => {
     useMessaging();
+    useSocket();
+
     const navigationRef = useRef<NavigationContainerRef>();
     const routeNameRef = useRef<string>();
 

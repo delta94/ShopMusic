@@ -1,22 +1,24 @@
 import { useFormik } from 'formik';
 import React, { FC, memo, MutableRefObject, useCallback, useEffect, useRef, useState } from 'react';
-import { StyleSheet, TouchableWithoutFeedback, View } from 'react-native';
+import { Alert, StyleSheet, TouchableWithoutFeedback, View } from 'react-native';
 import * as Yup from 'yup';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button, Input, Icon } from 'react-native-elements';
 import { useDispatch, useSelector } from 'react-redux';
 import { NavigationProp } from '@react-navigation/native';
+import debounce from 'lodash/debounce';
+import { unwrapResult } from '@reduxjs/toolkit';
 
 import { Colors } from 'styles/global.style';
 import { actions as actionsAuth } from '../../store';
 import { RootState } from 'store';
 
 const validationSchema = Yup.object({
-    email: Yup.string().required('Vui lòng nhập email hoặc username').email('Vui lòng nhập đúng định dạng email'),
+    username: Yup.string().required('Vui lòng nhập email hoặc username'),
     password: Yup.string().required('Vui lòng nhập mật khẩu ').min(6, 'Mật khẩu phải lớn hơn 6 ký tự'),
 });
 
-const initialValues = { email: '', password: '' };
+const initialValues = { username: '', password: '' };
 
 interface IProps {
     navigation: NavigationProp<any>;
@@ -36,11 +38,20 @@ const LoginScreen: FC<IProps> = ({ navigation }) => {
         !!isLogin && navigation.navigate('BottomTab');
     }, [isLogin, navigation]);
 
-    const onSubmitForm = useCallback(async valuesForm => {
-        setLoading(true);
-        // await dispatch(actionsAuth.signIn(valuesForm));
-        setLoading(false);
-    }, []);
+    const onSubmitForm = useCallback(
+        async valuesForm => {
+            setLoading(true);
+            try {
+                await dispatch<any>(actionsAuth.login(valuesForm)).then(unwrapResult);
+                navigation.goBack();
+            } catch {
+                debounce(() => Alert.alert('Thông báo', 'Đăng nhập lỗi!'), 500)();
+            } finally {
+                setLoading(false);
+            }
+        },
+        [dispatch, navigation],
+    );
 
     const { submitForm, handleBlur, handleChange, errors, values } = useFormik<typeof initialValues>({
         initialValues,
@@ -66,15 +77,15 @@ const LoginScreen: FC<IProps> = ({ navigation }) => {
                 autoFocus
                 returnKeyType="next"
                 autoCapitalize="none"
-                value={values.email}
-                onChangeText={handleChange('email')}
-                onBlur={handleBlur('email')}
+                value={values.username}
+                onChangeText={handleChange('username')}
+                onBlur={handleBlur('username')}
                 selectionColor={Colors.subtle}
                 style={styles.viewInput}
-                label="Email"
+                label="Username"
                 errorStyle={styles.errorStyle}
                 labelStyle={styles.labelStyle}
-                errorMessage={errors.email ? errors.email : undefined}
+                errorMessage={errors.username ? errors.username : undefined}
                 onSubmitEditing={onSubmitEditingEmail}
             />
 
@@ -107,7 +118,7 @@ const LoginScreen: FC<IProps> = ({ navigation }) => {
                 loading={loading}
                 title="Đăng nhập"
                 containerStyle={styles.buttonLogin}
-                disabled={!values.email || Object.keys(errors).length > 0}
+                disabled={!values.username || Object.keys(errors).length > 0}
                 onPress={submitForm}
                 titleStyle={styles.titleStyleButton}
             />

@@ -7,9 +7,11 @@ import NavigationService from 'navigation/NavigationService';
 import ImageCustom from 'components/ImageCustom';
 import { Colors } from 'styles/global.style';
 import { RootState } from 'store';
+import { User } from 'types/Auth/AuthResponse';
 
 const ViewProfile = () => {
     const isLogin = useSelector<RootState, boolean>(state => state.auth.isLogin);
+    const user = useSelector<RootState, User>(state => state.auth.user);
 
     const goToProfile = useCallback(() => {
         isLogin ? NavigationService.navigate('ProfileScreen') : NavigationService.navigate('LoginScreen');
@@ -20,15 +22,16 @@ const ViewProfile = () => {
             <View style={styles.container}>
                 <ImageCustom
                     source={{
-                        uri:
-                            'https://photo-resize-zmp3.zadn.vn/w240_r1x1_jpeg/avatars/3/a/6/d/3a6de9f068f10fcee2c50cdf9772ebaa.jpg',
+                        uri: isLogin
+                            ? user.info.avatar
+                            : 'https://photo-resize-zmp3.zadn.vn/w240_r1x1_jpeg/avatars/3/a/6/d/3a6de9f068f10fcee2c50cdf9772ebaa.jpg',
                     }}
                     resizeMode="cover"
                     style={styles.viewAvatar}
                 />
 
                 <View style={styles.viewContainer}>
-                    <Text style={styles.textName}>{isLogin ? 'Ngô Ngọc Đạt' : 'Đăng nhập'}</Text>
+                    <Text style={styles.textName}>{isLogin ? user.info.fullname : 'Đăng nhập'}</Text>
                     <Text style={styles.textViewProfile}>Xem thông tin</Text>
                 </View>
 

@@ -1,11 +1,19 @@
-import React, { memo, useCallback, useEffect, useState } from 'react';
+import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { GiftedChat, IMessage } from 'react-native-gifted-chat';
 import 'dayjs/locale/vi';
 import { ActivityIndicator, StatusBar, StyleSheet } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
+import firestore from '@react-native-firebase/firestore';
+import { useSelector } from 'react-redux';
+
+import { RootState } from 'store';
+import { User } from 'types/Auth/AuthResponse';
 
 const ChatScreen = () => {
+    const user = useSelector<RootState, User>(state => state.auth.user);
     const [messages, setMessages] = useState<IMessage[]>([]);
+
+    const collectionUser = firestore().collection(user.uuid);
 
     const changeStatusBar = useCallback(() => {
         StatusBar.setBarStyle('light-content', true);
@@ -14,66 +22,30 @@ const ChatScreen = () => {
     useFocusEffect(changeStatusBar);
 
     useEffect(() => {
-        setMessages([
-            {
-                _id: 1,
-                text: 'This is a quick reply. Do you love Gifted Chat? (radio) KEEP IT',
-                createdAt: new Date(),
-                quickReplies: {
-                    type: 'radio', // or 'checkbox',
-                    keepIt: true,
-                    values: [
-                        {
-                            title: '😋 Yes',
-                            value: 'yes',
-                        },
-                        {
-                            title: '📷 Yes, let me show you with a picture!',
-                            value: 'yes_picture',
-                        },
-                        {
-                            title: '😞 Nope. What?',
-                            value: 'no',
-                        },
-                    ],
-                },
-                user: {
-                    _id: 2,
-                    name: 'React Native',
-                },
-            },
-            {
-                _id: 2,
-                text: 'This is a quick reply. Do you love Gifted Chat? (checkbox)',
-                createdAt: new Date(),
-                quickReplies: {
-                    type: 'checkbox', // or 'radio',
-                    values: [
-                        {
-                            title: 'Yes',
-                            value: 'yes',
-                        },
-                        {
-                            title: 'Yes, let me show you with a picture!',
-                            value: 'yes_picture',
-                        },
-                        {
-                            title: 'Nope. What?',
-                            value: 'no',
-                        },
-                    ],
-                },
-                user: {
-                    _id: 2,
-                    name: 'React Native',
-                },
-            },
-        ]);
+        const subscriber = collectionUser.orderBy('createdAt', 'desc').onSnapshot(querySnapshot => {
+            const newMessage: any[] = [];
+
+            querySnapshot.forEach(documentSnapshot => {
+                newMessage.push({
+                    ...documentSnapshot.data(),
+                    createdAt: documentSnapshot.data().createdAt.toDate(),
+                });
+            });
+
+            setMessages(newMessage);
+        });
+
+        // Unsubscribe from events when no longer in use
+        return () => subscriber();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const onSend = useCallback((messages = []) => {
-        setMessages(previousMessages => GiftedChat.append(previousMessages, messages));
-    }, []);
+    const onSend = useCallback(
+        (messagesSend = []) => {
+            collectionUser.add({ ...messagesSend[0] });
+        },
+        [collectionUser],
+    );
 
     const renderLoading = useCallback(() => <ActivityIndicator />, []);
 
@@ -87,8 +59,9 @@ const ChatScreen = () => {
             showUserAvatar
             onSend={onSend}
             user={{
-                _id: 1,
-                name: 'Ngô Ngọc Đạt',
+                _id: user.info.uuid,
+                name: user.info.fullname,
+                avatar: user.info.avatar,
             }}
         />
     );

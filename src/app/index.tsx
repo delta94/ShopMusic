@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -13,7 +13,7 @@ import { setCustomFlatList } from 'utils/customs/setCustomFlatList';
 import { setCustomSectionList } from 'utils/customs/setCustomSectionList';
 import { setCustomScrollView } from 'utils/customs/setCustomScrollView';
 import Service from './service';
-// import { actions as actionsAuth } from 'modules/auth/store';
+import { actions as actionsAuth } from 'modules/auth/store';
 
 const theme: Theme = {
     colors: {
@@ -40,15 +40,15 @@ setCustomTextInput({ style: { fontFamily: 'Poppins' } });
 const AppSource = () => {
     const colorScheme = useColorScheme();
 
-    // const onBeforeLift = useCallback(() => {
-    //     store.dispatch(actionsAuth.checkLoginAccount());
-    // }, []);
+    const onBeforeLift = useCallback(() => {
+        store.dispatch(actionsAuth.checkLoginAccount());
+    }, []);
 
     TrackPlayer.registerPlaybackService(() => Service(store.dispatch));
 
     return (
         <Provider store={store}>
-            <PersistGate loading={null} persistor={persistor}>
+            <PersistGate onBeforeLift={onBeforeLift} loading={null} persistor={persistor}>
                 <ThemeProvider theme={theme} useDark={colorScheme === 'dark'}>
                     <SafeAreaProvider>
                         <NavigationApp />
