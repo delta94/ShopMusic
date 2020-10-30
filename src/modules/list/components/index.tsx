@@ -22,7 +22,7 @@ import { Song, SongDemo } from 'types/Songs/SongResponse';
 import { actions as actionsList } from '../store';
 import LoadingOverley from 'components/LoadingOverley';
 
-const { width } = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 
 interface IProps {
     navigation: NavigationProp<any>;
@@ -119,8 +119,8 @@ const ListScreen: FC<IProps> = ({ navigation, route }) => {
             </View>
 
             <FlatList
-                refreshing={refreshing}
-                onRefresh={onRefresh}
+                // refreshing={refreshing}
+                // onRefresh={onRefresh}
                 showsVerticalScrollIndicator={false}
                 data={data}
                 style={styles.flatList}
@@ -136,7 +136,7 @@ const ListScreen: FC<IProps> = ({ navigation, route }) => {
 };
 
 const styles = StyleSheet.create({
-    imageView: { width, height: 360 },
+    imageView: { width, height: height / 3 },
     viewIconPlay: { position: 'absolute', top: 335, right: 10, zIndex: 199 },
     textHeaderList: { fontSize: 20, fontWeight: '600', paddingLeft: 10, marginBottom: 20 },
     flatList: { paddingTop: 20 },

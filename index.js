@@ -12,8 +12,6 @@ LogBox.ignoreLogs([
     'Non-serializable values were found in the navigation state',
 ]);
 
-messaging().setBackgroundMessageHandler(async remoteMessage => {
-    console.log('Message handled in the background!', remoteMessage);
-});
+messaging().setBackgroundMessageHandler(async remoteMessage => {});
 
 AppRegistry.registerComponent(appName, () => App);

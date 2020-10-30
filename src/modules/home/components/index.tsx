@@ -1,11 +1,14 @@
 import { useFocusEffect } from '@react-navigation/native';
 import ImageCustom from 'components/ImageCustom';
-import React, { memo, useCallback, useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Dimensions, StatusBar, ImageBackground, TouchableOpacity } from 'react-native';
+import React, { Fragment, memo, useCallback, useEffect, useState } from 'react';
+import { View, Text, StyleSheet, Dimensions, StatusBar, TouchableOpacity } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import TrackPlayer, { Track } from 'react-native-track-player';
 import { useDispatch, useSelector } from 'react-redux';
 import RNBootSplash from 'react-native-bootsplash';
+import NetInfo from '@react-native-community/netinfo';
+import { BlurView } from '@react-native-community/blur';
+import FastImage from 'react-native-fast-image';
 
 import { RootState } from 'store';
 import { Colors } from 'styles/global.style';
@@ -13,11 +16,14 @@ import Palyer from './Palyer';
 import { actions as actionsList } from 'modules/list/store';
 import ModalSelectPrice from 'components/ModalSelectPrice';
 import NavigationService from 'navigation/NavigationService';
+import { useCheckDurationPlay } from 'hooks/useCheckDurationPlay';
+import { fancyTimeFormat } from 'utils/customs/fancyTimeFormat';
 
 const { width } = Dimensions.get('window');
 
 const HomeScreen = () => {
     const dispatch = useDispatch();
+    const timer = useCheckDurationPlay();
     const track = useSelector<RootState, Track>(state => state.home.track);
     const isLogin = useSelector<RootState, boolean>(state => state.auth.isLogin);
     const [isVisible, setIsVisible] = useState<boolean>(false);
@@ -33,6 +39,7 @@ const HomeScreen = () => {
     const setup = useCallback(async () => {
         await TrackPlayer.setupPlayer({});
         await TrackPlayer.updateOptions({ stopWithApp: true });
+        await NetInfo.fetch();
         RNBootSplash.hide();
     }, []);
 
@@ -54,45 +61,41 @@ const HomeScreen = () => {
     }, [isLogin]);
 
     return (
-        <ImageBackground
-            blurRadius={100}
-            source={{
-                uri:
-                    'https://photo-resize-zmp3.zadn.vn/w480_r1x1_jpeg/cover/d/8/9/9/d8996a26339f7b7a5d596666f03edac0.jpg',
-            }}
-            style={[styles.container, { paddingTop: top }]}>
-            <Text style={styles.textNowPlaying}>NOW PLAYING</Text>
+        <FastImage source={{ uri: track.artwork }} style={[styles.container, { paddingTop: top }]}>
+            <Fragment>
+                <BlurView style={StyleSheet.absoluteFill} blurType="dark" blurAmount={10} />
 
-            <View style={styles.viewImage}>
-                <ImageCustom
-                    source={{
-                        uri:
-                            'https://photo-resize-zmp3.zadn.vn/w480_r1x1_jpeg/cover/d/8/9/9/d8996a26339f7b7a5d596666f03edac0.jpg',
-                    }}
-                    style={styles.image}
-                    resizeMode="cover"
-                />
-            </View>
+                <Text style={styles.textNowPlaying}> {timer ? fancyTimeFormat(timer) : 'NOW PLAYING'}</Text>
 
-            <View>
-                <Text style={styles.songTitle}>{track.title}</Text>
-                <Text numberOfLines={1} style={styles.nameProducer}>
-                    {track.artist}
-                </Text>
-            </View>
-            <Palyer />
+                <View style={styles.viewImage}>
+                    <ImageCustom source={{ uri: track.artwork }} style={styles.image} resizeMode="cover" />
+                </View>
 
-            <TouchableOpacity onPress={openModal} style={styles.buttonBought}>
-                <Text style={styles.textBought}>Mua</Text>
-            </TouchableOpacity>
+                <View>
+                    <Text style={styles.songTitle}>{track.title}</Text>
+                    <Text numberOfLines={1} style={styles.nameProducer}>
+                        {track.artist}
+                    </Text>
+                </View>
+                <Palyer />
 
-            <ModalSelectPrice uuid={track.id} isVisible={isVisible} setIsVisible={setIsVisible} />
-        </ImageBackground>
+                <TouchableOpacity onPress={openModal} style={styles.buttonBought}>
+                    <Text style={styles.textBought}>Mua</Text>
+                </TouchableOpacity>
+
+                <ModalSelectPrice uuid={track.id} isVisible={isVisible} setIsVisible={setIsVisible} />
+            </Fragment>
+        </FastImage>
     );
 };
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: Colors.white, justifyContent: 'space-evenly' },
+    container: {
+        backgroundColor: Colors.white,
+        justifyContent: 'space-evenly',
+        width: '100%',
+        height: '100%',
+    },
     textNowPlaying: { fontSize: 18, textAlign: 'center', fontWeight: '700', color: Colors.white },
     image: {
         width: width / 1.2,

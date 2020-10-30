@@ -24,3 +24,5 @@ export const getQueue = createAsyncThunk('home/getQueue', () => TrackPlayer.getQ
 export const stopMusic = createAsyncThunk('home/stopMusic', services.stopMusic);
 
 export const getDetailSong = createAsyncThunk('home/getDetailSong', services.getDetailSong);
+
+export const buySong = createAsyncThunk('home/buySong', services.buySong);

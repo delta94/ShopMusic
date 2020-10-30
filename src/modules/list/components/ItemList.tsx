@@ -1,5 +1,5 @@
-import React, { FC, Fragment, memo, MutableRefObject, useCallback, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableHighlight } from 'react-native';
+import React, { FC, Fragment, memo, MutableRefObject, useCallback, useRef, useState } from 'react';
+import { View, Text, StyleSheet, TouchableHighlight, TouchableOpacity } from 'react-native';
 import { Icon } from 'react-native-elements';
 import TrackPlayer from 'react-native-track-player';
 import debounce from 'lodash/debounce';
@@ -8,6 +8,7 @@ import ActionSheet from 'react-native-actionsheet';
 import ImageCustom from 'components/ImageCustom';
 import { Song } from 'types/Songs/SongResponse';
 import { fancyTimeFormat } from 'utils/customs/fancyTimeFormat';
+import ModalSelectPrice from 'components/ModalSelectPrice';
 
 interface IProsp {
     onPress?: () => void;
@@ -17,17 +18,28 @@ interface IProsp {
 
 const ItemList: FC<IProsp> = ({ item, type }) => {
     const refActionSheet = useRef<ActionSheet>();
+    const [isVisible, setIsVisible] = useState<boolean>(false);
 
     const handlePressItem = useCallback(async () => {
-        await TrackPlayer.skip(type === 'songs' ? `${item.uuid}` : `${item.uuid}`);
+        await TrackPlayer.skip(item.uuid);
         debounce(() => TrackPlayer.play(), 500)();
-    }, [item.uuid, type]);
+    }, [item.uuid]);
 
     const onSelectAction = useCallback(
         (index: number) => {
             if (index === 0) {
                 if (type === 'song_demos') {
                     handlePressItem();
+                }
+
+                if (type === 'songs') {
+                    setIsVisible(true);
+                }
+            }
+
+            if (index === 1) {
+                if (type === 'song_demos') {
+                    setIsVisible(true);
                 }
             }
         },
@@ -51,13 +63,9 @@ const ItemList: FC<IProsp> = ({ item, type }) => {
                         <Text style={styles.textMins}>{fancyTimeFormat(item.time)} mins</Text>
                     </View>
 
-                    <Icon
-                        onPress={showActionSheet}
-                        type="entypo"
-                        name="dots-three-vertical"
-                        color="#757575"
-                        size={20}
-                    />
+                    <TouchableOpacity style={styles.iconDot} onPress={showActionSheet}>
+                        <Icon type="entypo" name="dots-three-vertical" color="#757575" size={20} />
+                    </TouchableOpacity>
                 </View>
             </TouchableHighlight>
             <ActionSheet
@@ -70,6 +78,11 @@ const ItemList: FC<IProsp> = ({ item, type }) => {
                 ].filter(Boolean)}
                 cancelButtonIndex={type === 'song_demos' ? 2 : 1}
                 onPress={onSelectAction}
+            />
+            <ModalSelectPrice
+                uuid={type === 'song_demos' ? item.uuid : item.parent}
+                isVisible={isVisible}
+                setIsVisible={setIsVisible}
             />
         </Fragment>
     );
@@ -87,6 +100,7 @@ const styles = StyleSheet.create({
     viewContent: { flex: 1, paddingLeft: 10 },
     nameMusic: { fontSize: 16, fontWeight: '600' },
     textMins: { fontSize: 12, marginTop: 3, color: '#757575', fontWeight: '500' },
+    iconDot: { width: 50, alignItems: 'flex-end' },
 });
 
 export default memo(ItemList);

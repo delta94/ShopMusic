@@ -1,13 +1,16 @@
-import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
-import { GiftedChat, IMessage } from 'react-native-gifted-chat';
+import React, { memo, useCallback, useEffect, useState } from 'react';
+import { Avatar, GiftedChat, IMessage } from 'react-native-gifted-chat';
 import 'dayjs/locale/vi';
 import { ActivityIndicator, StatusBar, StyleSheet } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import firestore from '@react-native-firebase/firestore';
 import { useSelector } from 'react-redux';
+import { Avatar as AvatarRn } from 'react-native-elements';
 
 import { RootState } from 'store';
 import { User } from 'types/Auth/AuthResponse';
+import FastImage from 'react-native-fast-image';
+import { Colors } from 'styles/global.style';
 
 const ChatScreen = () => {
     const user = useSelector<RootState, User>(state => state.auth.user);
@@ -49,8 +52,17 @@ const ChatScreen = () => {
 
     const renderLoading = useCallback(() => <ActivityIndicator />, []);
 
+    const renderAvatar = useCallback(({ currentMessage }: Avatar<IMessage>['props']) => {
+        return !!currentMessage && !!currentMessage.user && !!currentMessage.user.avatar ? (
+            <FastImage source={{ uri: currentMessage?.user.avatar }} resizeMode="cover" style={styles.imageAvatar} />
+        ) : (
+            <AvatarRn title={currentMessage?.user.name} titleStyle={{ color: Colors.primary }} rounded size="small" />
+        );
+    }, []);
+
     return (
         <GiftedChat
+            renderAvatar={renderAvatar}
             renderLoading={renderLoading}
             placeholder="Chat với Amdin"
             locale="vi"
@@ -69,6 +81,7 @@ const ChatScreen = () => {
 
 const styles = StyleSheet.create({
     textInputStyle: { fontSize: 14 },
+    imageAvatar: { width: 35, height: 35, borderRadius: 35 / 2 },
 });
 
 export default memo(ChatScreen);

@@ -22,17 +22,19 @@ export interface Song {
     title: string;
     description: string;
     slug: string;
-    parent: any;
+    parent: string;
     category: string;
     author: string;
     fileUuid: any;
-    thumb: any;
+    thumb: string;
     time: number;
     status: number;
     type: number;
     cost: number;
     createAt: string;
     publishAt: string;
+    usedTime: number;
+    expire: number;
     uuid: string;
 }
 
@@ -66,4 +68,10 @@ export interface Demo {
     created_at: any;
     updated_at: any;
     deleted_at: any;
+}
+
+export interface BuyMusicRequest {
+    time: number;
+    cost: number;
+    uuid: string;
 }

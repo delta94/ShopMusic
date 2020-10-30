@@ -20,14 +20,7 @@ const MusicComponent = () => {
 
     return (
         <TouchableOpacity onPress={goToHome} style={styles.container}>
-            <ImageCustom
-                source={{
-                    uri:
-                        'https://photo-resize-zmp3.zadn.vn/w480_r1x1_jpeg/cover/d/8/9/9/d8996a26339f7b7a5d596666f03edac0.jpg',
-                }}
-                resizeMode="cover"
-                style={styles.image}
-            />
+            <ImageCustom source={{ uri: track.artwork }} resizeMode="cover" style={styles.image} />
 
             <View style={styles.viewContainer}>
                 <Text numberOfLines={1} style={styles.textName}>

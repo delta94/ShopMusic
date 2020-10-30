@@ -1,4 +1,4 @@
-import { Alert, Platform } from 'react-native';
+import { Platform } from 'react-native';
 import TrackPlayer from 'react-native-track-player';
 
 import { actions as actionsHome } from 'modules/home/store';
@@ -14,7 +14,9 @@ async function Handler(dispatch: AppDispatch) {
         TrackPlayer.stop();
     });
 
-    TrackPlayer.addEventListener('remote-next', () => TrackPlayer.skipToNext());
+    TrackPlayer.addEventListener('remote-next', () => {
+        TrackPlayer.skipToNext();
+    });
 
     TrackPlayer.addEventListener('remote-previous', async () => {
         const time = await TrackPlayer.getPosition();

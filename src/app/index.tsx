@@ -6,6 +6,7 @@ import { Platform, useColorScheme } from 'react-native';
 import { ThemeProvider, colors, Theme } from 'react-native-elements';
 import { setCustomText, setCustomTextInput } from 'react-native-global-props';
 import TrackPlayer from 'react-native-track-player';
+import { useNetInfo } from '@react-native-community/netinfo';
 
 import store, { persistor } from 'store';
 import NavigationApp from 'navigation';
@@ -14,6 +15,7 @@ import { setCustomSectionList } from 'utils/customs/setCustomSectionList';
 import { setCustomScrollView } from 'utils/customs/setCustomScrollView';
 import Service from './service';
 import { actions as actionsAuth } from 'modules/auth/store';
+import NotInternet from './NotInternet';
 
 const theme: Theme = {
     colors: {
@@ -39,6 +41,7 @@ setCustomTextInput({ style: { fontFamily: 'Poppins' } });
 
 const AppSource = () => {
     const colorScheme = useColorScheme();
+    const { isConnected } = useNetInfo();
 
     const onBeforeLift = useCallback(() => {
         store.dispatch(actionsAuth.checkLoginAccount());
@@ -50,9 +53,7 @@ const AppSource = () => {
         <Provider store={store}>
             <PersistGate onBeforeLift={onBeforeLift} loading={null} persistor={persistor}>
                 <ThemeProvider theme={theme} useDark={colorScheme === 'dark'}>
-                    <SafeAreaProvider>
-                        <NavigationApp />
-                    </SafeAreaProvider>
+                    <SafeAreaProvider>{isConnected ? <NavigationApp /> : <NotInternet />}</SafeAreaProvider>
                 </ThemeProvider>
             </PersistGate>
         </Provider>

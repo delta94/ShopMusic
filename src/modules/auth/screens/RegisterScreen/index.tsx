@@ -1,11 +1,11 @@
 import { useFormik } from 'formik';
 import React, { FC, memo, MutableRefObject, useCallback, useEffect, useRef, useState } from 'react';
-import { Alert, StyleSheet, TouchableWithoutFeedback, View } from 'react-native';
+import { Alert, StatusBar, StyleSheet, TouchableWithoutFeedback, View } from 'react-native';
 import * as Yup from 'yup';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button, Input, Icon } from 'react-native-elements';
 import { useDispatch, useSelector } from 'react-redux';
-import { NavigationProp } from '@react-navigation/native';
+import { NavigationProp, useFocusEffect } from '@react-navigation/native';
 import debounce from 'lodash/debounce';
 import { unwrapResult } from '@reduxjs/toolkit';
 
@@ -41,6 +41,12 @@ const RegisterScreen: FC<IProps> = ({ navigation }) => {
     const [secureTextEntry, setSecureTextEntry] = useState(true);
     const [secureTextEntryConfirm, setSecureTextEntryConfirm] = useState(true);
     const [loading, setLoading] = useState<boolean>(false);
+
+    const changeStatusBar = useCallback(() => {
+        StatusBar.setBarStyle('light-content', true);
+    }, []);
+
+    useFocusEffect(changeStatusBar);
 
     useEffect(() => {
         !!isLogin && navigation.navigate('BottomTab');

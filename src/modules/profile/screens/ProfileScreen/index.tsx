@@ -1,8 +1,9 @@
 import { NavigationProp, useFocusEffect } from '@react-navigation/native';
 import React, { FC, Fragment, memo, useCallback } from 'react';
-import { View, Text, ScrollView, StyleSheet, ImageBackground, StatusBar, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, StatusBar, TouchableOpacity } from 'react-native';
 import { Icon } from 'react-native-elements';
 import { useDispatch, useSelector } from 'react-redux';
+import FastImage from 'react-native-fast-image';
 
 import { Colors } from 'styles/global.style';
 import ImageCustom from 'components/ImageCustom';
@@ -35,15 +36,16 @@ const ProfileScreen: FC<IProps> = ({ navigation }) => {
     }, [dispatch, navigation]);
 
     return (
-        <Fragment>
-            <ImageBackground
-                style={styles.container}
-                blurRadius={100}
-                source={{
-                    uri: isLogin
-                        ? user.info.avatar
-                        : 'https://photo-resize-zmp3.zadn.vn/w480_r1x1_jpeg/cover/2/c/a/a/2caa245f831832e8c1a2bcbc9f7673ba.jpg',
-                }}>
+        <FastImage
+            style={styles.container}
+            source={{
+                uri: isLogin
+                    ? user.info.avatar
+                    : 'https://photo-resize-zmp3.zadn.vn/w480_r1x1_jpeg/cover/2/c/a/a/2caa245f831832e8c1a2bcbc9f7673ba.jpg',
+            }}>
+            <Fragment>
+                <View style={styles.viewOverley} />
+
                 <TouchableOpacity onPress={navigation.goBack} style={styles.iconBack}>
                     <Icon type="ant-design" name="leftcircle" color={Colors.white} size={35} />
                 </TouchableOpacity>
@@ -71,13 +73,13 @@ const ProfileScreen: FC<IProps> = ({ navigation }) => {
                         </TouchableOpacity>
                     </View>
                 </ScrollView>
-            </ImageBackground>
-        </Fragment>
+            </Fragment>
+        </FastImage>
     );
 };
 
 const styles = StyleSheet.create({
-    container: { flex: 1 },
+    container: { width: '100%', height: '100%' },
     image: { width: 100, height: 100, borderRadius: 100 / 2 },
     viewImage: { alignItems: 'center' },
     textName: { fontSize: 22, fontWeight: '800', fontFamily: 'System', marginTop: 15, color: Colors.white },
@@ -97,6 +99,7 @@ const styles = StyleSheet.create({
         top: 50,
         zIndex: 2,
     },
+    viewOverley: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,.7)' },
 });
 
 export default memo(ProfileScreen);
