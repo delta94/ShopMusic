@@ -1,14 +1,17 @@
-import React, { FC, Fragment, memo, MutableRefObject, useCallback, useRef, useState } from 'react';
+import React, { FC, Fragment, memo, MutableRefObject, useCallback, useMemo, useRef, useState } from 'react';
 import { View, Text, StyleSheet, TouchableHighlight, TouchableOpacity } from 'react-native';
 import { Icon } from 'react-native-elements';
 import TrackPlayer from 'react-native-track-player';
 import debounce from 'lodash/debounce';
 import ActionSheet from 'react-native-actionsheet';
+import { useSelector } from 'react-redux';
 
 import ImageCustom from 'components/ImageCustom';
 import { Song } from 'types/Songs/SongResponse';
 import { fancyTimeFormat } from 'utils/customs/fancyTimeFormat';
 import ModalSelectPrice from 'components/ModalSelectPrice';
+import { RootState } from 'store';
+import NavigationService from 'navigation/NavigationService';
 
 interface IProsp {
     onPress?: () => void;
@@ -17,6 +20,8 @@ interface IProsp {
 }
 
 const ItemList: FC<IProsp> = ({ item, type }) => {
+    const isLogin = useSelector<RootState, boolean>(state => state.auth.isLogin);
+
     const refActionSheet = useRef<ActionSheet>();
     const [isVisible, setIsVisible] = useState<boolean>(false);
 
@@ -33,26 +38,36 @@ const ItemList: FC<IProsp> = ({ item, type }) => {
                 }
 
                 if (type === 'songs') {
+                    if (!isLogin) {
+                        NavigationService.navigate('LoginScreen');
+                        return;
+                    }
                     setIsVisible(true);
                 }
             }
 
             if (index === 1) {
                 if (type === 'song_demos') {
+                    if (!isLogin) {
+                        NavigationService.navigate('LoginScreen');
+                        return;
+                    }
                     setIsVisible(true);
                 }
             }
         },
-        [handlePressItem, type],
+        [handlePressItem, isLogin, type],
     );
 
     const showActionSheet = useCallback(() => {
         refActionSheet.current?.show();
     }, []);
 
+    const disabled = useMemo(() => type === 'songs' && item.expire - item.usedTime === 0, [item, type]);
+
     return (
         <Fragment>
-            <TouchableHighlight underlayColor="#d6d6d6" onPress={handlePressItem}>
+            <TouchableHighlight disabled={disabled} underlayColor="#d6d6d6" onPress={handlePressItem}>
                 <View style={styles.container}>
                     <ImageCustom source={{ uri: item.thumb }} resizeMode="cover" style={styles.viewImage} />
 
@@ -60,10 +75,12 @@ const ItemList: FC<IProsp> = ({ item, type }) => {
                         <Text style={styles.nameMusic} numberOfLines={1}>
                             {item.title}
                         </Text>
-                        <Text style={styles.textMins}>{fancyTimeFormat(item.time)} mins</Text>
+                        <Text style={styles.textMins}>
+                            {fancyTimeFormat(item.time)} mins {!!disabled && '(Bài hát hết hạn)'}
+                        </Text>
                     </View>
 
-                    <TouchableOpacity style={styles.iconDot} onPress={showActionSheet}>
+                    <TouchableOpacity disabled={disabled} style={styles.iconDot} onPress={showActionSheet}>
                         <Icon type="entypo" name="dots-three-vertical" color="#757575" size={20} />
                     </TouchableOpacity>
                 </View>

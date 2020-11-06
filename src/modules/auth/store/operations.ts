@@ -26,3 +26,5 @@ export const updateAvatar = createAsyncThunk('profile/updateAvatar', async (file
 });
 
 export const updateProfile = createAsyncThunk('auth/updateProfile', services.updateProfile);
+export const forgetPassword = createAsyncThunk('auth/forgetPassword', services.forgetPassword);
+export const changePassword = createAsyncThunk('auth/changePassword', services.changePassword);

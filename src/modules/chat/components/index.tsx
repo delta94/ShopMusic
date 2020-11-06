@@ -1,5 +1,10 @@
 import React, { memo, useCallback, useEffect, useState } from 'react';
 import { Avatar, GiftedChat, IMessage } from 'react-native-gifted-chat';
+import dayjs from 'dayjs';
+import advancedFormat from 'dayjs/plugin/advancedFormat';
+import localizedFormat from 'dayjs/plugin/localizedFormat';
+dayjs.extend(advancedFormat);
+dayjs.extend(localizedFormat);
 import 'dayjs/locale/vi';
 import { ActivityIndicator, StatusBar, StyleSheet } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
@@ -16,7 +21,8 @@ const ChatScreen = () => {
     const user = useSelector<RootState, User>(state => state.auth.user);
     const [messages, setMessages] = useState<IMessage[]>([]);
 
-    const collectionUser = firestore().collection(user.uuid);
+    const collectionUser = firestore().collection('inboxs').doc(user.uuid).collection('messages');
+    const collectionMessage = firestore().collection('inboxs').doc(user.uuid);
 
     const changeStatusBar = useCallback(() => {
         StatusBar.setBarStyle('light-content', true);
@@ -31,7 +37,6 @@ const ChatScreen = () => {
             querySnapshot.forEach(documentSnapshot => {
                 newMessage.push({
                     ...documentSnapshot.data(),
-                    createdAt: documentSnapshot.data().createdAt.toDate(),
                 });
             });
 
@@ -43,11 +48,29 @@ const ChatScreen = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
+    useEffect(() => {
+        collectionMessage.update({ unread_client: 0 });
+    }, [collectionMessage]);
+
     const onSend = useCallback(
-        (messagesSend = []) => {
-            collectionUser.add({ ...messagesSend[0] });
+        async (messagesSend: IMessage[] = []) => {
+            collectionUser.add({ ...messagesSend[0], createdAt: Number(dayjs(messagesSend[0].createdAt).format('x')) });
+
+            const getLastMessage: any = await collectionMessage.get().then(res => res.data());
+
+            collectionMessage.set(
+                {
+                    avatar: user.info.avatar,
+                    last_message: messagesSend[0].text,
+                    name: user.info.fullname,
+                    update_time: Number(dayjs(messagesSend[0].createdAt).format('x')),
+                    unread: getLastMessage ? Number(getLastMessage.unread) + 1 : 1,
+                    unread_client: 0,
+                },
+                { merge: true },
+            );
         },
-        [collectionUser],
+        [collectionMessage, collectionUser, user.info.avatar, user.info.fullname],
     );
 
     const renderLoading = useCallback(() => <ActivityIndicator />, []);

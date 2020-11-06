@@ -14,7 +14,7 @@ import { actions as actionsAuth } from '../../store';
 import { RootState } from 'store';
 
 const validationSchema = Yup.object({
-    email: Yup.string().required('Vui lòng nhập email'),
+    email: Yup.string().required('Vui lòng nhập email').email('Không đúng định dạng email'),
     password: Yup.string().required('Vui lòng nhập mật khẩu ').min(6, 'Mật khẩu phải lớn hơn 6 ký tự'),
     password_confirm: Yup.string()
         .required('Vui lòng nhập mật khẩu xác nhận')
@@ -99,7 +99,7 @@ const RegisterScreen: FC<IProps> = ({ navigation }) => {
                 onBlur={handleBlur('email')}
                 selectionColor={Colors.subtle}
                 style={styles.viewInput}
-                label="Username"
+                label="Email"
                 errorStyle={styles.errorStyle}
                 labelStyle={styles.labelStyle}
                 errorMessage={errors.email ? errors.email : undefined}

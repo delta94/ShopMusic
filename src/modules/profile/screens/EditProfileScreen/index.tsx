@@ -1,6 +1,6 @@
 /* eslint-disable react-native/no-inline-styles */
 import { NavigationProp, useFocusEffect } from '@react-navigation/native';
-import React, { FC, Fragment, memo, useCallback, useState } from 'react';
+import React, { FC, Fragment, memo, useCallback, useEffect, useState } from 'react';
 import {
     View,
     Text,
@@ -18,7 +18,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import { unwrapResult } from '@reduxjs/toolkit';
 import debounce from 'lodash/debounce';
 
-import { useIOS13 } from 'hooks/useIOS13';
 import { Colors } from 'styles/global.style';
 import ImageCustom from 'components/ImageCustom';
 import { RootState } from 'store';
@@ -51,7 +50,6 @@ const EditProfileScreen: FC<IProps> = ({ navigation }) => {
     const [loading, setLoading] = useState<boolean>(false);
 
     const { top } = useSafeAreaInsets();
-    const isIOS13 = useIOS13();
 
     const changeStatusBar = useCallback(() => {
         StatusBar.setBarStyle('dark-content', true);
@@ -101,32 +99,29 @@ const EditProfileScreen: FC<IProps> = ({ navigation }) => {
         }
     }, [dispatch, name, user.info]);
 
+    const headerRight = useCallback(
+        () => (
+            <Button
+                disabled={!name}
+                type="clear"
+                onPress={handlePress}
+                buttonStyle={styles.buttonStyle}
+                titleStyle={styles.titleStyle}
+                title="Save"
+            />
+        ),
+        [handlePress, name],
+    );
+
+    useEffect(() => {
+        navigation.setOptions({ headerRight });
+    }, [headerRight, navigation]);
+
     return (
         <Fragment>
             <LoadingOverley visible={loading} />
 
-            {isIOS13 && (
-                <View style={styles.viewHeader}>
-                    <Button
-                        onPress={navigation.goBack}
-                        type="clear"
-                        buttonStyle={styles.buttonStyle}
-                        titleStyle={styles.titleStyle}
-                        title="Cancel"
-                    />
-                    <Text style={styles.textEdit}>Edit Profile</Text>
-                    <Button
-                        disabled={!name}
-                        type="clear"
-                        onPress={handlePress}
-                        buttonStyle={styles.buttonStyle}
-                        titleStyle={styles.titleStyle}
-                        title="Save"
-                    />
-                </View>
-            )}
-
-            <View style={[styles.viewContent, { paddingTop: isIOS13 ? 0 : top }]}>
+            <View style={[styles.viewContent, { paddingTop: top }]}>
                 <TouchableOpacity activeOpacity={1} onPress={showImagePicker}>
                     <ImageCustom
                         source={
@@ -169,7 +164,7 @@ const styles = StyleSheet.create({
         borderBottomColor: '#d6d6d6',
         borderBottomWidth: 0.5,
     },
-    titleStyle: { fontSize: 12, color: Colors.subtle },
+    titleStyle: { fontSize: 14, color: Colors.subtle },
     buttonStyle: { paddingHorizontal: 0, paddingVertical: 0 },
     textEdit: { fontSize: 15, fontWeight: '500' },
     viewContent: { flex: 1, marginTop: 20, alignItems: 'center' },

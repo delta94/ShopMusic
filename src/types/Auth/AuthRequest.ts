@@ -13,5 +13,5 @@ export interface Info {
 export interface LoginRequest {
     username: string;
     password: string;
-    fcmToken?: string;
+    firebase_token?: string;
 }

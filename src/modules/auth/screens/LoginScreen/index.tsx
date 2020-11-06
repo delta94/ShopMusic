@@ -9,14 +9,15 @@ import { NavigationProp, useFocusEffect } from '@react-navigation/native';
 import debounce from 'lodash/debounce';
 import { unwrapResult } from '@reduxjs/toolkit';
 import messaging from '@react-native-firebase/messaging';
+import prompt from 'react-native-prompt-android';
 
 import { Colors } from 'styles/global.style';
 import { actions as actionsAuth } from '../../store';
 import { RootState } from 'store';
 
 const validationSchema = Yup.object({
-    username: Yup.string().required('Vui lòng nhập email hoặc username'),
-    password: Yup.string().required('Vui lòng nhập mật khẩu ').min(6, 'Mật khẩu phải lớn hơn 6 ký tự'),
+    username: Yup.string().required('Vui lòng nhập email').email('Không đúng định dạng email'),
+    password: Yup.string().required('Vui lòng nhập mật khẩu').min(6, 'Mật khẩu phải lớn hơn 6 ký tự'),
 });
 
 const initialValues = { username: '', password: '' };
@@ -49,8 +50,8 @@ const LoginScreen: FC<IProps> = ({ navigation }) => {
         async valuesForm => {
             setLoading(true);
             try {
-                const fcmToken = await messaging().getToken();
-                await dispatch<any>(actionsAuth.login({ ...valuesForm, fcmToken })).then(unwrapResult);
+                const firebase_token = await messaging().getToken();
+                await dispatch<any>(actionsAuth.login({ ...valuesForm, firebase_token })).then(unwrapResult);
                 navigation.goBack();
             } catch {
                 debounce(() => Alert.alert('Thông báo', 'Đăng nhập lỗi!'), 500)();
@@ -79,6 +80,37 @@ const LoginScreen: FC<IProps> = ({ navigation }) => {
         refInputPassword.current?.focus();
     }, []);
 
+    const handleResetPassword = useCallback(() => {
+        prompt(
+            'Quên mật khẩu',
+            'Nhập email của bạn muốn reset mật khẩu',
+            [
+                { text: 'Cancel', onPress: () => console.log('Cancel Pressed'), style: 'cancel' },
+                {
+                    text: 'OK',
+                    onPress: async email => {
+                        try {
+                            setLoading(true);
+                            await dispatch<any>(actionsAuth.forgetPassword(email)).then(unwrapResult);
+                            Alert.alert(
+                                'Thông báo',
+                                'Chúng tôi đã gửi mật khẩu mới đến email của bạn. Vui lòng kiểm tra hòm thư!',
+                            );
+                        } catch (error) {
+                            Alert.alert('Thông báo', 'Không tìm thấy mail trong hệ thống');
+                        } finally {
+                            setLoading(false);
+                        }
+                    },
+                },
+            ],
+            {
+                cancelable: false,
+                placeholder: 'Email',
+            },
+        );
+    }, [dispatch]);
+
     return (
         <View style={[styles.container, { paddingTop: top }]}>
             <Input
@@ -90,7 +122,7 @@ const LoginScreen: FC<IProps> = ({ navigation }) => {
                 onBlur={handleBlur('username')}
                 selectionColor={Colors.subtle}
                 style={styles.viewInput}
-                label="Username"
+                label="Email"
                 errorStyle={styles.errorStyle}
                 labelStyle={styles.labelStyle}
                 errorMessage={errors.username ? errors.username : undefined}
@@ -138,6 +170,12 @@ const LoginScreen: FC<IProps> = ({ navigation }) => {
                     onPress={goToForgetPassword}
                     titleStyle={styles.textForgetPassword}
                 />
+                <Button
+                    type="clear"
+                    title="Quên mật khẩu"
+                    onPress={handleResetPassword}
+                    titleStyle={styles.textForgetPassword}
+                />
             </View>
         </View>
     );
@@ -147,12 +185,19 @@ const styles = StyleSheet.create({
     container: { flex: 1, alignItems: 'center', paddingHorizontal: 20, backgroundColor: Colors.white },
     buttonLogin: { width: '100%', marginTop: 17 },
     viewInput: { fontSize: 15, color: Colors.subtle },
-    viewForgetPassword: { width: '100%', alignItems: 'flex-end', marginTop: 20 },
+    viewForgetPassword: {
+        width: '100%',
+        alignItems: 'flex-end',
+        marginTop: 20,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+    },
     textForgetPassword: { color: Colors.subtle, fontSize: 15 },
     errorStyle: { color: Colors.danger, fontSize: 13 },
     labelStyle: { color: Colors.subtle, fontSize: 14, fontWeight: '500' },
     titleStyleButton: { fontSize: 15, fontWeight: '600' },
     viewFaceId: { marginTop: 20, alignItems: 'center' },
+    viewPassword: { width: '100%', alignItems: 'flex-end', marginTop: 0 },
 });
 
 export default memo(LoginScreen);

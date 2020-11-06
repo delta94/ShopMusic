@@ -9,7 +9,7 @@ export const useMessaging = () => {
         // !messaging().isDeviceRegisteredForRemoteMessages && messaging().registerDeviceForRemoteMessages();
 
         PushNotification.setApplicationIconBadgeNumber(0);
-        messaging().subscribeToTopic('all');
+        messaging().subscribeToTopic('NewDemo');
 
         PushNotification.configure({
             onNotification: () => {},
@@ -30,7 +30,6 @@ export const useMessaging = () => {
     useEffect(() => {
         messaging().onNotificationOpenedApp(remoteMessage => {
             if (remoteMessage) {
-                console.log('remoteMessage', remoteMessage);
             }
         });
 
@@ -38,13 +37,11 @@ export const useMessaging = () => {
             .getInitialNotification()
             .then(remoteMessage => {
                 if (remoteMessage) {
-                    console.log('remoteMessage', remoteMessage);
                 }
             });
 
         const unsubscribe = messaging().onMessage(async remoteMessage => {
             const { notification } = remoteMessage;
-            console.log('remoteMessage', remoteMessage);
 
             PushNotification.localNotification({
                 title: notification.title || '',

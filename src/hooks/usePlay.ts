@@ -34,7 +34,7 @@ export const usePlay = () => {
         } else {
             const track = await TrackPlayer.getTrack(currentTrack);
 
-            if (!!track && !!track.rating && !timer) {
+            if (!!track && !!track.rating && timer <= 0) {
                 await TrackPlayer.stop();
                 return;
             }

@@ -1,14 +1,16 @@
 import { NavigationProp, useFocusEffect } from '@react-navigation/native';
-import React, { FC, Fragment, useCallback } from 'react';
-import { Dimensions, FlatList, ScrollView, StatusBar, StyleSheet, View } from 'react-native';
+import React, { FC, Fragment, useCallback, useEffect, useState } from 'react';
+import { Dimensions, FlatList, ScrollView, StatusBar, StyleSheet, Text, View } from 'react-native';
 import { useSelector } from 'react-redux';
 import { Icon } from 'react-native-elements';
+import firestore from '@react-native-firebase/firestore';
 
 import ViewProfile from './ViewProfile';
 import { RootState } from 'store';
 import ItemMusic from './ItemMusic';
 import ImageCustom from 'components/ImageCustom';
 import { Colors } from 'styles/global.style';
+import { User } from 'types/Auth/AuthResponse';
 
 const { height } = Dimensions.get('window');
 interface IProps {
@@ -16,7 +18,9 @@ interface IProps {
 }
 
 const MusicScreen: FC<IProps> = ({ navigation }) => {
+    const [badge, setBadge] = useState<number>(0);
     const isLogin = useSelector<RootState, boolean>(state => state.auth.isLogin);
+    const user = useSelector<RootState, User>(state => state.auth.user);
 
     const changeStatusBar = useCallback(() => {
         StatusBar.setBarStyle('light-content', true);
@@ -38,6 +42,18 @@ const MusicScreen: FC<IProps> = ({ navigation }) => {
         navigation.navigate('ChatScreen');
     }, [navigation]);
 
+    useEffect(() => {
+        if (isLogin) {
+            firestore()
+                .collection('inboxs')
+                .doc(user.uuid)
+                .onSnapshot(querySnapshot => {
+                    const res: any = querySnapshot.data();
+                    !!res && setBadge(res.unread_client);
+                });
+        }
+    }, [isLogin, user]);
+
     return (
         <Fragment>
             <ImageCustom source={require('assets/images/background.jpg')} resizeMode="cover" style={styles.viewImage} />
@@ -45,6 +61,12 @@ const MusicScreen: FC<IProps> = ({ navigation }) => {
             {isLogin && (
                 <View style={styles.viewChat}>
                     <Icon type="ant-design" onPress={goToChat} name="wechat" size={30} color={Colors.white} />
+
+                    {!!badge && (
+                        <View style={styles.viewBadge}>
+                            <Text style={styles.textBadge}>{badge}</Text>
+                        </View>
+                    )}
                 </View>
             )}
 
@@ -82,6 +104,18 @@ const styles = StyleSheet.create({
     itemSeparatorComponent: { height: 10 },
     viewImage: { height: height / 4 },
     viewChat: { position: 'absolute', right: 10, top: 50 },
+    viewBadge: {
+        position: 'absolute',
+        top: -4,
+        right: -8,
+        backgroundColor: Colors.primary,
+        width: 20,
+        height: 20,
+        borderRadius: 20 / 2,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    textBadge: { color: Colors.white, fontWeight: '700', fontSize: 12 },
 });
 
 export default MusicScreen;

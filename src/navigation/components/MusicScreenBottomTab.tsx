@@ -61,7 +61,6 @@ const MusicScreenBottomTab = () => {
                         title: 'Chỉnh sửa thông tin',
                         headerStyle: { backgroundColor: Colors.white },
                         headerTintColor: Colors.subtle,
-                        stackPresentation: isIOS13 ? 'modal' : 'push',
                     }}
                     name="EditProfileScreen"
                     component={EditProfileScreen}

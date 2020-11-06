@@ -35,6 +35,10 @@ const ProfileScreen: FC<IProps> = ({ navigation }) => {
         navigation.goBack();
     }, [dispatch, navigation]);
 
+    const goToEditPassword = useCallback(() => {
+        navigation.navigate('ChangePasswordScreen');
+    }, [navigation]);
+
     return (
         <FastImage
             style={styles.container}
@@ -70,6 +74,9 @@ const ProfileScreen: FC<IProps> = ({ navigation }) => {
 
                         <TouchableOpacity onPress={goToEditProfilel} style={styles.viewEditProfile}>
                             <Text style={styles.textEditProfile}>EDIT PROFILE</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={goToEditPassword} style={styles.viewEditProfile}>
+                            <Text style={styles.textEditProfile}>Change password</Text>
                         </TouchableOpacity>
                     </View>
                 </ScrollView>

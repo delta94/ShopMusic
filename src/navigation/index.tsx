@@ -11,6 +11,7 @@ import NavigationService from './NavigationService';
 import LoginScreen from 'modules/auth/screens/LoginScreen';
 import RegisterScreen from 'modules/auth/screens/RegisterScreen';
 import ChatScreen from 'modules/chat/components';
+import ChangePasswordScreen from 'modules/auth/screens/ChangePassword';
 import { useMessaging } from 'hooks/useMessaging';
 import { useSocket } from 'hooks/useSocket';
 import { useAddTrack } from 'hooks/useAddTrack';
@@ -63,6 +64,11 @@ const NavigationApp = () => {
                     options={{ title: 'Đăng nhập', headerHideShadow: true }}
                     name="LoginScreen"
                     component={LoginScreen}
+                />
+                <Stack.Screen
+                    options={{ title: 'Thay đổi mật khẩu', headerHideShadow: true }}
+                    name="ChangePasswordScreen"
+                    component={ChangePasswordScreen}
                 />
                 <Stack.Screen
                     options={{ title: 'Đăng ký', headerHideShadow: true }}

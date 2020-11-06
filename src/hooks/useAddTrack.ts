@@ -1,8 +1,9 @@
 import { useCallback, useEffect } from 'react';
-import TrackPlayer, { Track, usePlaybackState } from 'react-native-track-player';
+import TrackPlayer, { Track, usePlaybackState, useTrackPlayerProgress } from 'react-native-track-player';
 import { useSelector } from 'react-redux';
 import differenceBy from 'lodash/differenceBy';
 import debounce from 'lodash/debounce';
+import last from 'lodash/last';
 
 import { RootState } from 'store';
 import { apiAxios } from 'store/axios';
@@ -19,10 +20,12 @@ const getFileMp3Songs = (uuid: string): Promise<string> =>
 
 export const useAddTrack = () => {
     const playbackState = usePlaybackState();
+    const { duration, position } = useTrackPlayerProgress();
 
     const songs = useSelector<RootState, Song[]>(state => state.list.songs);
     const songsDemo = useSelector<RootState, Song[]>(state => state.list.songsDemo);
     const isLogin = useSelector<RootState, boolean>(state => state.auth.isLogin);
+    const token = useSelector<RootState, string>(state => state.auth.token);
 
     const updateTrack = useCallback(async () => {
         const [currentTrack, duration, position] = await Promise.all([
@@ -68,7 +71,7 @@ export const useAddTrack = () => {
                 url: allSongsDemoMp3[index],
                 type: 'default',
                 title: item.title,
-                artist: item.description,
+                artist: item.description || item.title,
                 artwork: item.thumb,
                 duration: item.time,
                 rating: 0,
@@ -86,22 +89,24 @@ export const useAddTrack = () => {
         const allSongsMp3 = await Promise.all(songs.map(item => getFileMp3Songs(item.uuid)));
 
         if (songs.length > 0 && isLogin) {
-            const listNewSongs: Track[] = songs.map((item, index) => ({
-                id: `${item.uuid}`,
-                url: allSongsMp3[index],
-                type: 'default',
-                title: item.title,
-                artist: item.description,
-                artwork: item.thumb,
-                duration: item.time,
-                rating: item.expire - item.usedTime,
-            }));
+            const listNewSongs: Track[] = songs
+                .map((item, index) => ({
+                    id: `${item.uuid}`,
+                    url: allSongsMp3[index],
+                    type: 'default',
+                    title: item.title,
+                    artist: item.description || item.title,
+                    artwork: item.thumb,
+                    duration: item.time,
+                    rating: item.expire - item.usedTime,
+                }))
+                .filter(item => !!item.rating);
 
             const listDiff = differenceBy(listNewSongs, listPlays, 'id');
 
-            listDiff.length > 0 && (await TrackPlayer.add(listDiff));
+            listDiff.length > 0 && (await TrackPlayer.add(listDiff.map(i => ({ ...i, headers: { token } }))));
         }
-    }, [isLogin, songs]);
+    }, [isLogin, songs, token]);
 
     useEffect(() => {
         addPlaySongs();
@@ -110,4 +115,24 @@ export const useAddTrack = () => {
     useEffect(() => {
         addPlayDemo();
     }, [addPlayDemo]);
+
+    const checkTime = useCallback(async () => {
+        const currentTrack = await TrackPlayer.getCurrentTrack();
+
+        if (currentTrack) {
+            const [queue, track] = await Promise.all([TrackPlayer.getQueue(), TrackPlayer.getTrack(currentTrack)]);
+
+            if (position > duration) {
+                if (last(queue)?.id === track.id) {
+                    await TrackPlayer.stop();
+                } else {
+                    await TrackPlayer.skipToNext();
+                }
+            }
+        }
+    }, [duration, position]);
+
+    useEffect(() => {
+        checkTime();
+    }, [checkTime]);
 };

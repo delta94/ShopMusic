@@ -65,7 +65,7 @@ const HomeScreen = () => {
             <Fragment>
                 <BlurView style={StyleSheet.absoluteFill} blurType="dark" blurAmount={10} />
 
-                <Text style={styles.textNowPlaying}> {timer ? fancyTimeFormat(timer) : 'NOW PLAYING'}</Text>
+                <Text style={styles.textNowPlaying}> {timer <= 0 ? fancyTimeFormat(timer) : 'NOW PLAYING'}</Text>
 
                 <View style={styles.viewImage}>
                     <ImageCustom source={{ uri: track.artwork }} style={styles.image} resizeMode="cover" />

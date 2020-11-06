@@ -18,9 +18,10 @@ import ItemList from './ItemList';
 import { Icon } from 'react-native-elements';
 import { ListScreenRouteProp } from 'types/NavigationRoute';
 import { RootState } from 'store';
-import { Song, SongDemo } from 'types/Songs/SongResponse';
+import { Song } from 'types/Songs/SongResponse';
 import { actions as actionsList } from '../store';
 import LoadingOverley from 'components/LoadingOverley';
+import ModalBuyMore from './ModalBuyMore';
 
 const { width, height } = Dimensions.get('window');
 
@@ -31,6 +32,8 @@ interface IProps {
 
 const ListScreen: FC<IProps> = ({ navigation, route }) => {
     const dispatch = useDispatch();
+
+    const isLogin = useSelector<RootState, boolean>(state => state.auth.isLogin);
     const songs = useSelector<RootState, Song[]>(state => state.list.songs);
     const songsDemo = useSelector<RootState, SongDemo[]>(state => state.list.songsDemo);
     const hasNextSongs = useSelector<RootState, boolean>(state => state.list.hasNextSongs);
@@ -39,6 +42,7 @@ const ListScreen: FC<IProps> = ({ navigation, route }) => {
     const [loading, setLoading] = useState<boolean>(true);
     const [refreshing, setRefreshing] = useState<boolean>(false);
     const [page, setPage] = useState<number>(1);
+    const [isVisible, setIsVisible] = useState<boolean>(false);
 
     const { params } = route;
     const { type } = params;
@@ -99,6 +103,14 @@ const ListScreen: FC<IProps> = ({ navigation, route }) => {
         }
     }, [checkLoadMore, dispatch, page, type]);
 
+    const openModalBuyMore = useCallback(() => {
+        if (!isLogin) {
+            navigation.navigate('LoginScreen');
+            return;
+        }
+        setIsVisible(true);
+    }, [isLogin, navigation]);
+
     return (
         <Fragment>
             <LoadingOverley visible={loading} />
@@ -116,11 +128,15 @@ const ListScreen: FC<IProps> = ({ navigation, route }) => {
                 <TouchableOpacity onPress={navigation.goBack} style={styles.iconBack}>
                     <Icon type="ant-design" name="leftcircle" color={Colors.white} size={35} />
                 </TouchableOpacity>
+
+                <TouchableOpacity onPress={openModalBuyMore} style={styles.buttonBuyMore}>
+                    <Text style={styles.textBuyMore}>Mua nhiều</Text>
+                </TouchableOpacity>
             </View>
 
             <FlatList
-                // refreshing={refreshing}
-                // onRefresh={onRefresh}
+                refreshing={refreshing}
+                onRefresh={onRefresh}
                 showsVerticalScrollIndicator={false}
                 data={data}
                 style={styles.flatList}
@@ -131,6 +147,8 @@ const ListScreen: FC<IProps> = ({ navigation, route }) => {
                 onEndReachedThreshold={0.5}
                 onEndReached={onEndReached}
             />
+
+            <ModalBuyMore type={type} setIsVisible={setIsVisible} isVisible={isVisible} />
         </Fragment>
     );
 };
@@ -143,6 +161,16 @@ const styles = StyleSheet.create({
     itemSeparatorComponent: { height: 10 },
     listFooterComponent: { height: 100, alignItems: 'center', justifyContent: 'center' },
     iconBack: { position: 'absolute', left: 15, top: 50 },
+    buttonBuyMore: {
+        position: 'absolute',
+        top: 55,
+        right: 15,
+        backgroundColor: Colors.primary,
+        borderRadius: 5,
+        paddingVertical: 2,
+        paddingHorizontal: 5,
+    },
+    textBuyMore: { color: Colors.white, fontWeight: '500' },
 });
 
 export default ListScreen;

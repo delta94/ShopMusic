@@ -44,6 +44,7 @@ const AppSource = () => {
     const { isConnected } = useNetInfo();
 
     const onBeforeLift = useCallback(() => {
+        TrackPlayer.reset();
         store.dispatch(actionsAuth.checkLoginAccount());
     }, []);
 

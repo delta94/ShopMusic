@@ -5,7 +5,7 @@ import { apiAxios, setHeaders } from 'store/axios';
 import { LoginRequest, RegisterRequest } from 'types/Auth/AuthRequest';
 import { RegisterResult, User, LoginResult, Info } from 'types/Auth/AuthResponse';
 import { UpdateProfileRequest } from 'types/Profile/ProfileRequest';
-import { ChangeAvatarResponse, UserInfoResponse } from 'types/Profile/ProfileResponse';
+import { ChangeAvatarResponse, ChangePasswordResponse, UserInfoResponse } from 'types/Profile/ProfileResponse';
 
 export const register = (body: RegisterRequest): Promise<User> =>
     apiAxios.post<RegisterResult>('user/register', body).then(res => {
@@ -61,6 +61,24 @@ export const updateAvatar = (file: any): Promise<string> => {
 
 export const getUserInfo = (): Promise<Info> =>
     apiAxios.get<UserInfoResponse>('user/info').then(res => {
+        if (res.data.message === 'success') {
+            return res.data.data;
+        }
+
+        return Promise.reject();
+    });
+
+export const forgetPassword = (email: string) =>
+    apiAxios.get<ChangeAvatarResponse>(`user/forget/sendemail/${email}`).then(res => {
+        if (res.data.message === 'success') {
+            return res.data.data;
+        }
+
+        return Promise.reject();
+    });
+
+export const changePassword = (body: { password: string; oldPassword: string }): Promise<User> =>
+    apiAxios.post<ChangePasswordResponse>('user/update-password', body).then(res => {
         if (res.data.message === 'success') {
             return res.data.data;
         }

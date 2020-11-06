@@ -30,7 +30,7 @@ export const instance = (baseURL: string): AxiosInstance => {
     return axiosInstance;
 };
 
-export const apiAxios = instance('http://103.124.94.189:9333/');
+export const apiAxios = instance('http://45.117.81.184:8080/');
 
 export function setHeaders(params: any): void {
     const newHeaders = {
