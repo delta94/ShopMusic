@@ -102,6 +102,7 @@ const EditProfileScreen: FC<IProps> = ({ navigation }) => {
     const headerRight = useCallback(
         () => (
             <Button
+                TouchableComponent={TouchableOpacity}
                 disabled={!name}
                 type="clear"
                 onPress={handlePress}

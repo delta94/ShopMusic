@@ -1,6 +1,6 @@
 /* eslint-disable no-bitwise */
 import React, { memo, useCallback } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Icon, Slider, Button } from 'react-native-elements';
 import TrackPlayer, { useTrackPlayerProgress, Track } from 'react-native-track-player';
 import { useSelector } from 'react-redux';
@@ -51,6 +51,7 @@ const Palyer = () => {
             <View style={styles.viewActions}>
                 <View style={styles.actions}>
                     <Button
+                        TouchableComponent={TouchableOpacity}
                         disabled={String(track.id) === String(head(queue)?.id)}
                         onPress={skipToPrevious}
                         icon={
@@ -64,6 +65,7 @@ const Palyer = () => {
                         type="clear"
                     />
                     <Button
+                        TouchableComponent={TouchableOpacity}
                         onPress={togglePlayback}
                         icon={
                             <Icon
@@ -76,6 +78,7 @@ const Palyer = () => {
                         type="clear"
                     />
                     <Button
+                        TouchableComponent={TouchableOpacity}
                         disabled={String(track.id) === String(last(queue)?.id)}
                         onPress={skipToNext}
                         icon={

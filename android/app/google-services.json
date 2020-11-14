@@ -30,6 +30,49 @@
             {
               "client_id": "671699132166-7akiqaic5q8p7bcbjrk7h9nll5fudhhj.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "671699132166-3jnfoh4sd1ook0qlnskhvum2skrfuumr.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.megaads.shopmusic"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:671699132166:android:0f8028f40ef0decc434887",
+        "android_client_info": {
+          "package_name": "com.nvl.shopmusic"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "671699132166-7akiqaic5q8p7bcbjrk7h9nll5fudhhj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDZMDlKy_PjBcASZKHEro9dqwDy8j2hCD4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "671699132166-7akiqaic5q8p7bcbjrk7h9nll5fudhhj.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "671699132166-3jnfoh4sd1ook0qlnskhvum2skrfuumr.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.megaads.shopmusic"
+              }
             }
           ]
         }

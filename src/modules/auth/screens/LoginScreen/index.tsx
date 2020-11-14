@@ -1,6 +1,6 @@
 import { useFormik } from 'formik';
 import React, { FC, memo, MutableRefObject, useCallback, useEffect, useRef, useState } from 'react';
-import { Alert, StatusBar, StyleSheet, TouchableWithoutFeedback, View } from 'react-native';
+import { Alert, StatusBar, StyleSheet, TouchableOpacity, View } from 'react-native';
 import * as Yup from 'yup';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button, Input, Icon } from 'react-native-elements';
@@ -139,14 +139,14 @@ const LoginScreen: FC<IProps> = ({ navigation }) => {
                 style={styles.viewInput}
                 label="Password"
                 rightIcon={
-                    <TouchableWithoutFeedback onPress={toggleSecureEntry}>
+                    <TouchableOpacity onPress={toggleSecureEntry}>
                         <Icon
                             type="ionicon"
                             size={20}
                             color={Colors.subtle}
                             name={secureTextEntry ? 'eye-off' : 'eye'}
                         />
-                    </TouchableWithoutFeedback>
+                    </TouchableOpacity>
                 }
                 labelStyle={styles.labelStyle}
                 errorStyle={styles.errorStyle}
@@ -155,6 +155,7 @@ const LoginScreen: FC<IProps> = ({ navigation }) => {
             />
 
             <Button
+                TouchableComponent={TouchableOpacity}
                 loading={loading}
                 title="Đăng nhập"
                 containerStyle={styles.buttonLogin}
@@ -165,12 +166,14 @@ const LoginScreen: FC<IProps> = ({ navigation }) => {
 
             <View style={styles.viewForgetPassword}>
                 <Button
+                    TouchableComponent={TouchableOpacity}
                     type="clear"
                     title="Đăng ký tài khoản"
                     onPress={goToForgetPassword}
                     titleStyle={styles.textForgetPassword}
                 />
                 <Button
+                    TouchableComponent={TouchableOpacity}
                     type="clear"
                     title="Quên mật khẩu"
                     onPress={handleResetPassword}

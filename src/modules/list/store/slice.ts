@@ -36,6 +36,12 @@ const list = createSlice({
             state.hasNextSongsDemo = !payload.last;
         });
         //
+        builder.addCase(operations.addCode.pending, () => {});
+        builder.addCase(operations.addCode.rejected, () => {});
+        builder.addCase(operations.addCode.fulfilled, (state, { payload }) => {
+            state.songs = [payload, ...state.songs];
+        });
+        //
     },
 });
 

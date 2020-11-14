@@ -1,9 +1,22 @@
 import { NavigationProp, useFocusEffect } from '@react-navigation/native';
 import React, { FC, Fragment, useCallback, useEffect, useState } from 'react';
-import { Dimensions, FlatList, ScrollView, StatusBar, StyleSheet, Text, View } from 'react-native';
-import { useSelector } from 'react-redux';
+import {
+    Alert,
+    Dimensions,
+    FlatList,
+    ScrollView,
+    StatusBar,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+} from 'react-native';
+import { useDispatch, useSelector } from 'react-redux';
 import { Icon } from 'react-native-elements';
 import firestore from '@react-native-firebase/firestore';
+import prompt from 'react-native-prompt-android';
+import { unwrapResult } from '@reduxjs/toolkit';
+import debounce from 'lodash/debounce';
 
 import ViewProfile from './ViewProfile';
 import { RootState } from 'store';
@@ -11,6 +24,7 @@ import ItemMusic from './ItemMusic';
 import ImageCustom from 'components/ImageCustom';
 import { Colors } from 'styles/global.style';
 import { User } from 'types/Auth/AuthResponse';
+import { actions as listActions } from 'modules/list/store';
 
 const { height } = Dimensions.get('window');
 interface IProps {
@@ -18,6 +32,7 @@ interface IProps {
 }
 
 const MusicScreen: FC<IProps> = ({ navigation }) => {
+    const dispatch = useDispatch();
     const [badge, setBadge] = useState<number>(0);
     const isLogin = useSelector<RootState, boolean>(state => state.auth.isLogin);
     const user = useSelector<RootState, User>(state => state.auth.user);
@@ -54,6 +69,36 @@ const MusicScreen: FC<IProps> = ({ navigation }) => {
         }
     }, [isLogin, user]);
 
+    const enterCode = useCallback(() => {
+        prompt(
+            'Nhập code',
+            'Nếu bạn có code dùng để lấy một bài hát từ hệ thống thì bạn hãy nhập vào đây nhé',
+            [
+                { text: 'Đóng', onPress: () => console.log('Cancel Pressed'), style: 'cancel' },
+                {
+                    text: 'Gửi',
+                    onPress: async code => {
+                        try {
+                            await dispatch<any>(listActions.addCode(code)).then(unwrapResult);
+                            goToListScreen('songs');
+                            debounce(() => Alert.alert('Thông báo', 'Thêm bài hát thành công'), 1000)();
+                        } catch (error) {
+                            debounce(
+                                () =>
+                                    Alert.alert('Thông báo', 'Thêm bài hát lỗi do code không tồn tại hoặc đã sử dụng'),
+                                500,
+                            )();
+                        }
+                    },
+                },
+            ],
+            {
+                cancelable: false,
+                placeholder: 'Email',
+            },
+        );
+    }, [dispatch, goToListScreen]);
+
     return (
         <Fragment>
             <ImageCustom source={require('assets/images/background.jpg')} resizeMode="cover" style={styles.viewImage} />
@@ -68,6 +113,12 @@ const MusicScreen: FC<IProps> = ({ navigation }) => {
                         </View>
                     )}
                 </View>
+            )}
+
+            {isLogin && (
+                <TouchableOpacity onPress={enterCode} style={styles.viewEnterCode}>
+                    <Text style={styles.textCode}>Nhập code</Text>
+                </TouchableOpacity>
             )}
 
             <ScrollView automaticallyAdjustContentInsets style={styles.scrollView}>
@@ -116,6 +167,17 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     textBadge: { color: Colors.white, fontWeight: '700', fontSize: 12 },
+    viewEnterCode: {
+        paddingHorizontal: 10,
+        paddingVertical: 5,
+        backgroundColor: Colors.primary,
+        position: 'absolute',
+        left: 10,
+        top: 50,
+        borderRadius: 10,
+    },
+    flexRow: { flexDirection: 'row', justifyContent: 'flex-end' },
+    textCode: { color: Colors.white, fontWeight: '700' },
 });
 
 export default MusicScreen;

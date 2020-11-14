@@ -1,6 +1,6 @@
 import { useFormik } from 'formik';
 import React, { FC, memo, MutableRefObject, useCallback, useEffect, useRef, useState } from 'react';
-import { Alert, StatusBar, StyleSheet, TouchableWithoutFeedback, View } from 'react-native';
+import { Alert, StatusBar, StyleSheet, TouchableOpacity, View } from 'react-native';
 import * as Yup from 'yup';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button, Input, Icon } from 'react-native-elements';
@@ -132,14 +132,14 @@ const RegisterScreen: FC<IProps> = ({ navigation }) => {
                 style={styles.viewInput}
                 label="Password"
                 rightIcon={
-                    <TouchableWithoutFeedback onPress={toggleSecureEntry}>
+                    <TouchableOpacity onPress={toggleSecureEntry}>
                         <Icon
                             type="ionicon"
                             size={20}
                             color={Colors.subtle}
                             name={secureTextEntry ? 'eye-off' : 'eye'}
                         />
-                    </TouchableWithoutFeedback>
+                    </TouchableOpacity>
                 }
                 labelStyle={styles.labelStyle}
                 errorStyle={styles.errorStyle}
@@ -157,14 +157,14 @@ const RegisterScreen: FC<IProps> = ({ navigation }) => {
                 style={styles.viewInput}
                 label="Xác nhận lại mật khẩu"
                 rightIcon={
-                    <TouchableWithoutFeedback onPress={toggleSecureEntryConfirm}>
+                    <TouchableOpacity onPress={toggleSecureEntryConfirm}>
                         <Icon
                             type="ionicon"
                             size={20}
                             color={Colors.subtle}
                             name={secureTextEntryConfirm ? 'eye-off' : 'eye'}
                         />
-                    </TouchableWithoutFeedback>
+                    </TouchableOpacity>
                 }
                 labelStyle={styles.labelStyle}
                 errorStyle={styles.errorStyle}
@@ -173,6 +173,7 @@ const RegisterScreen: FC<IProps> = ({ navigation }) => {
             />
 
             <Button
+                TouchableComponent={TouchableOpacity}
                 loading={loading}
                 title="Đăng ký"
                 containerStyle={styles.buttonLogin}

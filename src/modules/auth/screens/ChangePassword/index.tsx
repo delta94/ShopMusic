@@ -1,7 +1,7 @@
 import { NavigationProp, useFocusEffect } from '@react-navigation/native';
 import { useFormik } from 'formik';
 import React, { FC, memo, MutableRefObject, useCallback, useRef, useState } from 'react';
-import { Alert, StatusBar, StyleSheet, TouchableWithoutFeedback, View } from 'react-native';
+import { Alert, StatusBar, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Button, Icon, Input } from 'react-native-elements';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useDispatch } from 'react-redux';
@@ -85,14 +85,14 @@ const ChangePasswordScreen: FC<IProps> = ({ navigation }) => {
                 labelStyle={styles.labelStyle}
                 errorMessage={errors.oldPassword ? errors.oldPassword : undefined}
                 rightIcon={
-                    <TouchableWithoutFeedback onPress={toggleSecurePasswordNew}>
+                    <TouchableOpacity onPress={toggleSecurePasswordNew}>
                         <Icon
                             type="ionicon"
                             size={20}
                             color={Colors.subtle}
                             name={secureTextPassword ? 'eye-off' : 'eye'}
                         />
-                    </TouchableWithoutFeedback>
+                    </TouchableOpacity>
                 }
             />
 
@@ -106,14 +106,14 @@ const ChangePasswordScreen: FC<IProps> = ({ navigation }) => {
                 style={styles.viewInput}
                 label="Mật khẩu mới"
                 rightIcon={
-                    <TouchableWithoutFeedback onPress={toggleSecureEntry}>
+                    <TouchableOpacity onPress={toggleSecureEntry}>
                         <Icon
                             type="ionicon"
                             size={20}
                             color={Colors.subtle}
                             name={secureTextPasswordNew ? 'eye-off' : 'eye'}
                         />
-                    </TouchableWithoutFeedback>
+                    </TouchableOpacity>
                 }
                 labelStyle={styles.labelStyle}
                 errorStyle={styles.errorStyle}
@@ -122,6 +122,7 @@ const ChangePasswordScreen: FC<IProps> = ({ navigation }) => {
             />
 
             <Button
+                TouchableComponent={TouchableOpacity}
                 loading={loading}
                 title="Đổi mật khẩu"
                 containerStyle={styles.buttonLogin}
