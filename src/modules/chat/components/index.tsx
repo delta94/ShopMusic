@@ -25,7 +25,7 @@ const ChatScreen = () => {
     const collectionMessage = firestore().collection('inboxs').doc(user.uuid);
 
     const changeStatusBar = useCallback(() => {
-        StatusBar.setBarStyle('light-content', true);
+        StatusBar.setBarStyle('dark-content', true);
     }, []);
 
     useFocusEffect(changeStatusBar);

@@ -1,22 +1,14 @@
 /* eslint-disable react-native/no-inline-styles */
 import { NavigationProp, useFocusEffect } from '@react-navigation/native';
-import React, { FC, Fragment, memo, useCallback, useEffect, useState } from 'react';
-import {
-    View,
-    Text,
-    StatusBar,
-    StyleSheet,
-    TouchableOpacity,
-    ImageSourcePropType,
-    Platform,
-    Alert,
-} from 'react-native';
+import React, { FC, Fragment, memo, MutableRefObject, useCallback, useEffect, useRef, useState } from 'react';
+import { View, Text, StatusBar, StyleSheet, TouchableOpacity, ImageSourcePropType, Alert } from 'react-native';
 import { Button, Input } from 'react-native-elements';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import ImagePicker, { ImagePickerOptions } from 'react-native-image-picker';
 import { useDispatch, useSelector } from 'react-redux';
 import { unwrapResult } from '@reduxjs/toolkit';
 import debounce from 'lodash/debounce';
+import ImagePicker, { Options, Image } from 'react-native-image-crop-picker';
+import ActionSheet from 'react-native-actionsheet';
 
 import { Colors } from 'styles/global.style';
 import ImageCustom from 'components/ImageCustom';
@@ -29,19 +21,8 @@ interface IProps {
     navigation: NavigationProp<any>;
 }
 
-const options: ImagePickerOptions = {
-    title: 'Change profile photo',
-    cancelButtonTitle: 'Cancel',
-    takePhotoButtonTitle: 'Take photo',
-    chooseFromLibraryButtonTitle: 'Choose from library',
-    mediaType: 'photo',
-    storageOptions: {
-        skipBackup: true,
-        path: 'images',
-    },
-};
-
 const EditProfileScreen: FC<IProps> = ({ navigation }) => {
+    const refActionSheet = useRef<ActionSheet>();
     const dispatch = useDispatch();
     const user = useSelector<RootState, User>(state => state.auth.user);
     const isLogin = useSelector<RootState, boolean>(state => state.auth.isLogin);
@@ -57,35 +38,28 @@ const EditProfileScreen: FC<IProps> = ({ navigation }) => {
 
     useFocusEffect(changeStatusBar);
 
-    const showImagePicker = useCallback(() => {
-        ImagePicker.showImagePicker(options, async response => {
-            if (response.didCancel) {
-            } else if (response.error) {
-            } else if (response.customButton) {
-            } else {
-                const source = { uri: 'data:image/jpeg;base64,' + response.data };
-                setSourceImage(source);
-                setLoading(true);
-                try {
-                    await dispatch<any>(
-                        actionsAuth.updateAvatar({
-                            uri: Platform.OS === 'ios' ? response.uri.replace('file://', '') : response.uri,
-                            size: response.fileSize,
-                            height: response.height,
-                            width: response.width,
-                            type: response.type,
-                            name: response.fileName ? response.fileName : `${user.info.uuid}.png`,
-                        }),
-                    ).then(unwrapResult);
-                    debounce(() => Alert.alert('Thông báo', 'Chỉnh sửa ảnh thành công'), 500)();
-                } catch {
-                    debounce(() => Alert.alert('Thông báo', 'Chỉnh sửa ảnh lỗi'), 500)();
-                } finally {
-                    setLoading(false);
-                }
+    const updateAvatar = useCallback(
+        async (response: Image) => {
+            try {
+                await dispatch<any>(
+                    actionsAuth.updateAvatar({
+                        uri: response.path,
+                        height: response.height,
+                        width: response.width,
+                        size: response.size,
+                        type: response.mime,
+                        name: response.filename ? response.filename : `${user.info.uuid}.png`,
+                    }),
+                ).then(unwrapResult);
+                debounce(() => Alert.alert('Thông báo', 'Chỉnh sửa ảnh thành công'), 500)();
+            } catch {
+                debounce(() => Alert.alert('Thông báo', 'Chỉnh sửa ảnh lỗi'), 500)();
+            } finally {
+                setLoading(false);
             }
-        });
-    }, [dispatch, user]);
+        },
+        [dispatch, user],
+    );
 
     const handlePress = useCallback(async () => {
         setLoading(true);
@@ -118,9 +92,51 @@ const EditProfileScreen: FC<IProps> = ({ navigation }) => {
         navigation.setOptions({ headerRight });
     }, [headerRight, navigation]);
 
+    const onSelectAction = useCallback(
+        (index: number) => {
+            const options: Options = {
+                mediaType: 'photo',
+                useFrontCamera: true,
+                cropperCircleOverlay: true,
+                cropping: true,
+                avoidEmptySpaceAroundImage: true,
+                cropperToolbarTitle: 'Thay đổi avatar',
+                loadingLabelText: 'Loading...',
+                cropperCancelText: 'Đóng',
+                cropperChooseText: 'Chọn',
+                compressImageQuality: 1,
+            };
+
+            if (index === 0) {
+                ImagePicker.openCamera(options).then(response => {
+                    setSourceImage({ uri: response.path });
+                    updateAvatar(response);
+                });
+            } else if (index === 1) {
+                ImagePicker.openPicker(options).then(response => {
+                    setSourceImage({ uri: response.path });
+                    updateAvatar(response);
+                });
+            }
+        },
+        [updateAvatar],
+    );
+
+    const showImagePicker = useCallback(() => {
+        refActionSheet.current?.show();
+    }, []);
+
     return (
         <Fragment>
             <LoadingOverley visible={loading} />
+
+            <ActionSheet
+                ref={refActionSheet as MutableRefObject<ActionSheet>}
+                title="Đỏi avatar"
+                options={['Chụp ảnh', 'Lấy ảnh từ thư viện', 'Cancel']}
+                cancelButtonIndex={2}
+                onPress={onSelectAction}
+            />
 
             <View style={[styles.viewContent, { paddingTop: top }]}>
                 <TouchableOpacity activeOpacity={1} onPress={showImagePicker}>

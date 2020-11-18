@@ -1,16 +1,14 @@
 import { useCallback, useMemo } from 'react';
 import TrackPlayer, { Track, usePlaybackState } from 'react-native-track-player';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import last from 'lodash/last';
 import debounce from 'lodash/debounce';
 
 import { RootState } from 'store';
-import { useCheckDurationPlay } from './useCheckDurationPlay';
 
 export const usePlay = () => {
     const playbackState = usePlaybackState();
     const queue = useSelector<RootState, Track[]>(state => state.home.queue);
-    const timer = useCheckDurationPlay();
 
     const checkPlay = useMemo<boolean>(() => {
         if (playbackState === TrackPlayer.STATE_PLAYING || playbackState === TrackPlayer.STATE_BUFFERING) {
@@ -32,13 +30,6 @@ export const usePlay = () => {
         if (currentTrack == null) {
             await TrackPlayer.play();
         } else {
-            const track = await TrackPlayer.getTrack(currentTrack);
-
-            if (!!track && !!track.rating && timer <= 0) {
-                await TrackPlayer.stop();
-                return;
-            }
-
             if (playbackState === TrackPlayer.STATE_PAUSED || playbackState === TrackPlayer.STATE_NONE) {
                 const lastMusic = last(queue);
 
@@ -54,7 +45,7 @@ export const usePlay = () => {
                 await TrackPlayer.pause();
             }
         }
-    }, [playbackState, queue, timer]);
+    }, [playbackState, queue]);
 
     return { checkPlay, playbackState, togglePlayback };
 };

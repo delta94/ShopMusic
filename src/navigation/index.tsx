@@ -15,6 +15,7 @@ import ChangePasswordScreen from 'modules/auth/screens/ChangePassword';
 import { useMessaging } from 'hooks/useMessaging';
 import { useSocket } from 'hooks/useSocket';
 import { useAddTrack } from 'hooks/useAddTrack';
+import { Colors } from 'styles/global.style';
 
 enableScreens();
 const Stack = createNativeStackNavigator();
@@ -61,22 +62,27 @@ const NavigationApp = () => {
             <Stack.Navigator screenOptions={screenOptionsNative} initialRouteName="BottomTab">
                 <Stack.Screen options={{ headerShown: false }} name="BottomTab" component={BottomTab} />
                 <Stack.Screen
-                    options={{ title: 'Đăng nhập', headerHideShadow: true }}
+                    options={{ title: 'Đăng nhập', headerHideShadow: true, headerShown: false }}
                     name="LoginScreen"
                     component={LoginScreen}
                 />
                 <Stack.Screen
-                    options={{ title: 'Thay đổi mật khẩu', headerHideShadow: true }}
+                    options={{ title: 'Thay đổi mật khẩu', headerHideShadow: true, headerShown: false }}
                     name="ChangePasswordScreen"
                     component={ChangePasswordScreen}
                 />
                 <Stack.Screen
-                    options={{ title: 'Đăng ký', headerHideShadow: true }}
+                    options={{ title: 'Đăng ký', headerHideShadow: true, headerShown: false }}
                     name="RegisterScreen"
                     component={RegisterScreen}
                 />
                 <Stack.Screen
-                    options={{ title: 'Chat với Admin', headerRight: undefined }}
+                    options={{
+                        title: 'Chat với Admin',
+                        headerRight: undefined,
+                        headerTintColor: Colors.black,
+                        headerStyle: { backgroundColor: Colors.white },
+                    }}
                     name="ChatScreen"
                     component={ChatScreen}
                 />

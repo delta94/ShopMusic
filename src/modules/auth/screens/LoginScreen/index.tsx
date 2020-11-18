@@ -1,8 +1,7 @@
 import { useFormik } from 'formik';
-import React, { FC, memo, MutableRefObject, useCallback, useEffect, useRef, useState } from 'react';
-import { Alert, StatusBar, StyleSheet, TouchableOpacity, View } from 'react-native';
+import React, { FC, Fragment, memo, MutableRefObject, useCallback, useEffect, useRef, useState } from 'react';
+import { Alert, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import * as Yup from 'yup';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button, Input, Icon } from 'react-native-elements';
 import { useDispatch, useSelector } from 'react-redux';
 import { NavigationProp, useFocusEffect } from '@react-navigation/native';
@@ -10,10 +9,12 @@ import debounce from 'lodash/debounce';
 import { unwrapResult } from '@reduxjs/toolkit';
 import messaging from '@react-native-firebase/messaging';
 import prompt from 'react-native-prompt-android';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 import { Colors } from 'styles/global.style';
 import { actions as actionsAuth } from '../../store';
 import { RootState } from 'store';
+import ImageCustom from 'components/ImageCustom';
 
 const validationSchema = Yup.object({
     username: Yup.string().required('Vui lòng nhập email').email('Không đúng định dạng email'),
@@ -33,7 +34,6 @@ const LoginScreen: FC<IProps> = ({ navigation }) => {
     const [loading, setLoading] = useState<boolean>(false);
 
     const refInputPassword = useRef<Input>();
-    const { top } = useSafeAreaInsets();
     const [secureTextEntry, setSecureTextEntry] = useState(true);
 
     const changeStatusBar = useCallback(() => {
@@ -112,80 +112,89 @@ const LoginScreen: FC<IProps> = ({ navigation }) => {
     }, [dispatch]);
 
     return (
-        <View style={[styles.container, { paddingTop: top }]}>
-            <Input
-                autoFocus
-                returnKeyType="next"
-                autoCapitalize="none"
-                value={values.username}
-                onChangeText={handleChange('username')}
-                onBlur={handleBlur('username')}
-                selectionColor={Colors.subtle}
-                style={styles.viewInput}
-                label="Email"
-                errorStyle={styles.errorStyle}
-                labelStyle={styles.labelStyle}
-                errorMessage={errors.username ? errors.username : undefined}
-                onSubmitEditing={onSubmitEditingEmail}
-            />
+        <Fragment>
+            <ImageCustom source={require('assets/images/background.jpg')} resizeMode="cover" style={styles.imageView} />
+            <TouchableOpacity onPress={navigation.goBack} style={styles.iconBack}>
+                <Icon type="ant-design" name="leftcircle" color={Colors.white} size={35} />
+            </TouchableOpacity>
+            <Text style={styles.textTitle}>Đăng nhập</Text>
 
-            <Input
-                ref={refInputPassword as MutableRefObject<Input>}
-                value={values.password}
-                secureTextEntry={secureTextEntry}
-                onChangeText={handleChange('password')}
-                onBlur={handleBlur('password')}
-                selectionColor={Colors.subtle}
-                style={styles.viewInput}
-                label="Password"
-                rightIcon={
-                    <TouchableOpacity onPress={toggleSecureEntry}>
-                        <Icon
-                            type="ionicon"
-                            size={20}
-                            color={Colors.subtle}
-                            name={secureTextEntry ? 'eye-off' : 'eye'}
-                        />
-                    </TouchableOpacity>
-                }
-                labelStyle={styles.labelStyle}
-                errorStyle={styles.errorStyle}
-                onSubmitEditing={submitForm}
-                errorMessage={errors.password ? errors.password : undefined}
-            />
+            <KeyboardAwareScrollView automaticallyAdjustContentInsets style={styles.container}>
+                <Input
+                    autoFocus
+                    returnKeyType="next"
+                    autoCapitalize="none"
+                    value={values.username}
+                    onChangeText={handleChange('username')}
+                    onBlur={handleBlur('username')}
+                    selectionColor={Colors.subtle}
+                    style={styles.viewInput}
+                    label="Email"
+                    errorStyle={styles.errorStyle}
+                    labelStyle={styles.labelStyle}
+                    errorMessage={errors.username ? errors.username : undefined}
+                    onSubmitEditing={onSubmitEditingEmail}
+                />
 
-            <Button
-                TouchableComponent={TouchableOpacity}
-                loading={loading}
-                title="Đăng nhập"
-                containerStyle={styles.buttonLogin}
-                disabled={!values.username || Object.keys(errors).length > 0}
-                onPress={submitForm}
-                titleStyle={styles.titleStyleButton}
-            />
+                <Input
+                    ref={refInputPassword as MutableRefObject<Input>}
+                    value={values.password}
+                    secureTextEntry={secureTextEntry}
+                    onChangeText={handleChange('password')}
+                    onBlur={handleBlur('password')}
+                    selectionColor={Colors.subtle}
+                    style={styles.viewInput}
+                    label="Password"
+                    rightIcon={
+                        <TouchableOpacity onPress={toggleSecureEntry}>
+                            <Icon
+                                type="ionicon"
+                                size={20}
+                                color={Colors.subtle}
+                                name={secureTextEntry ? 'eye-off' : 'eye'}
+                            />
+                        </TouchableOpacity>
+                    }
+                    labelStyle={styles.labelStyle}
+                    errorStyle={styles.errorStyle}
+                    onSubmitEditing={submitForm}
+                    errorMessage={errors.password ? errors.password : undefined}
+                />
 
-            <View style={styles.viewForgetPassword}>
                 <Button
                     TouchableComponent={TouchableOpacity}
-                    type="clear"
-                    title="Đăng ký tài khoản"
-                    onPress={goToForgetPassword}
-                    titleStyle={styles.textForgetPassword}
+                    loading={loading}
+                    title="Đăng nhập"
+                    containerStyle={styles.buttonLogin}
+                    disabled={!values.username || Object.keys(errors).length > 0}
+                    onPress={submitForm}
+                    titleStyle={styles.titleStyleButton}
                 />
-                <Button
-                    TouchableComponent={TouchableOpacity}
-                    type="clear"
-                    title="Quên mật khẩu"
-                    onPress={handleResetPassword}
-                    titleStyle={styles.textForgetPassword}
-                />
-            </View>
-        </View>
+
+                <View style={styles.viewForgetPassword}>
+                    <Button
+                        TouchableComponent={TouchableOpacity}
+                        type="clear"
+                        title="Đăng ký tài khoản"
+                        onPress={goToForgetPassword}
+                        titleStyle={styles.textForgetPassword}
+                    />
+                    <Button
+                        TouchableComponent={TouchableOpacity}
+                        type="clear"
+                        title="Quên mật khẩu"
+                        onPress={handleResetPassword}
+                        titleStyle={styles.textForgetPassword}
+                    />
+                </View>
+            </KeyboardAwareScrollView>
+        </Fragment>
     );
 };
 
 const styles = StyleSheet.create({
-    container: { flex: 1, alignItems: 'center', paddingHorizontal: 20, backgroundColor: Colors.white },
+    container: { flex: 1, backgroundColor: Colors.white, paddingHorizontal: 20, paddingTop: 20 },
+    imageView: { height: 200 },
     buttonLogin: { width: '100%', marginTop: 17 },
     viewInput: { fontSize: 15, color: Colors.subtle },
     viewForgetPassword: {
@@ -201,6 +210,8 @@ const styles = StyleSheet.create({
     titleStyleButton: { fontSize: 15, fontWeight: '600' },
     viewFaceId: { marginTop: 20, alignItems: 'center' },
     viewPassword: { width: '100%', alignItems: 'flex-end', marginTop: 0 },
+    textTitle: { position: 'absolute', color: Colors.white, top: 50, right: 10, fontSize: 20, fontWeight: 'bold' },
+    iconBack: { position: 'absolute', left: 15, top: 50 },
 });
 
 export default memo(LoginScreen);

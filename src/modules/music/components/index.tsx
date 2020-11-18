@@ -94,7 +94,7 @@ const MusicScreen: FC<IProps> = ({ navigation }) => {
             ],
             {
                 cancelable: false,
-                placeholder: 'Email',
+                placeholder: 'CODE',
             },
         );
     }, [dispatch, goToListScreen]);

@@ -16,14 +16,11 @@ import Palyer from './Palyer';
 import { actions as actionsList } from 'modules/list/store';
 import ModalSelectPrice from 'components/ModalSelectPrice';
 import NavigationService from 'navigation/NavigationService';
-import { useCheckDurationPlay } from 'hooks/useCheckDurationPlay';
-import { fancyTimeFormat } from 'utils/customs/fancyTimeFormat';
 
 const { width } = Dimensions.get('window');
 
 const HomeScreen = () => {
     const dispatch = useDispatch();
-    const timer = useCheckDurationPlay();
     const track = useSelector<RootState, Track>(state => state.home.track);
     const isLogin = useSelector<RootState, boolean>(state => state.auth.isLogin);
     const [isVisible, setIsVisible] = useState<boolean>(false);
@@ -74,7 +71,7 @@ const HomeScreen = () => {
             <Fragment>
                 <BlurView style={StyleSheet.absoluteFill} blurType="dark" blurAmount={10} />
 
-                <Text style={styles.textNowPlaying}> {timer <= 0 ? fancyTimeFormat(timer) : 'NOW PLAYING'}</Text>
+                <Text style={styles.textNowPlaying}>NOW PLAYING</Text>
 
                 <View style={styles.viewImage}>
                     <ImageCustom source={{ uri: track.artwork }} style={styles.image} resizeMode="cover" />

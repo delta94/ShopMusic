@@ -117,10 +117,7 @@ const ListScreen: FC<IProps> = ({ navigation, route }) => {
 
             <View>
                 <ImageCustom
-                    source={{
-                        uri:
-                            'https://photo-resize-zmp3.zadn.vn/w480_r1x1_jpeg/cover/d/8/9/9/d8996a26339f7b7a5d596666f03edac0.jpg',
-                    }}
+                    source={require('assets/images/background.jpg')}
                     resizeMode="cover"
                     style={styles.imageView}
                 />
