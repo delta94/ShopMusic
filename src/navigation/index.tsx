@@ -13,7 +13,6 @@ import RegisterScreen from 'modules/auth/screens/RegisterScreen';
 import ChatScreen from 'modules/chat/components';
 import ChangePasswordScreen from 'modules/auth/screens/ChangePassword';
 import { useMessaging } from 'hooks/useMessaging';
-import { useSocket } from 'hooks/useSocket';
 import { useAddTrack } from 'hooks/useAddTrack';
 import { Colors } from 'styles/global.style';
 
@@ -33,7 +32,6 @@ const getActiveRouteName = (state: any): string => {
 
 const NavigationApp = () => {
     useMessaging();
-    useSocket();
     useAddTrack();
 
     const navigationRef = useRef<NavigationContainerRef>();

@@ -1,18 +1,17 @@
-import React, { FC, Fragment, memo, MutableRefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { View, Text, StyleSheet, Dimensions, TouchableOpacity, Alert, Platform } from 'react-native';
+import React, { FC, Fragment, memo, useCallback, useEffect, useState } from 'react';
+import { View, Text, StyleSheet, Dimensions, TouchableOpacity, Alert } from 'react-native';
 import Modal from 'react-native-modal';
 import { useDispatch, useSelector } from 'react-redux';
-import range from 'lodash/range';
 import { unwrapResult } from '@reduxjs/toolkit';
 import Clipboard from '@react-native-community/clipboard';
 import debounce from 'lodash/debounce';
-import RNPickerSelect, { Item } from 'react-native-picker-select';
 
 import { Colors } from 'styles/global.style';
 import { Song } from 'types/Songs/SongResponse';
 import { actions as actionsHome } from 'modules/home/store';
 import { RootState } from 'store';
 import { formatPrice } from 'utils/customs/formatPrice';
+import { Input } from 'react-native-elements';
 
 const { width } = Dimensions.get('window');
 
@@ -23,11 +22,10 @@ interface IProps {
 }
 
 const ModalSelectPrice: FC<IProps> = ({ uuid, isVisible, setIsVisible }) => {
-    const refPicker = useRef<RNPickerSelect>();
     const dispatch = useDispatch();
     const detailSong = useSelector<RootState, Song>(state => state.home.detailSong);
 
-    const [time, setTime] = useState<number>(0);
+    const [time, setTime] = useState<string>('');
     const [codePayment, setCodePayment] = useState<string>('');
 
     const getDetailSong = useCallback(() => {
@@ -49,24 +47,11 @@ const ModalSelectPrice: FC<IProps> = ({ uuid, isVisible, setIsVisible }) => {
         setIsVisible(false);
     }, [setIsVisible]);
 
-    const times = useMemo<Item[]>(
-        () =>
-            (Object.keys(detailSong).length > 0 ? range(Math.ceil(detailSong.time / 60)) : []).map(item => ({
-                label: `${item + 1} phút (${formatPrice((item + 1) * detailSong.cost)})`,
-                value: item + 1,
-            })),
-        [detailSong],
-    );
-
-    const onValueChange = useCallback((value: number) => {
-        setTime(Number(value));
-    }, []);
-
     const handleBuy = useCallback(async () => {
         try {
             const res = await dispatch<any>(
                 actionsHome.buySong({
-                    time: time * 60,
+                    time: Number(time) * 60,
                     cost: detailSong.cost,
                     uuid: detailSong.parent ? detailSong.parent : detailSong.uuid,
                 }),
@@ -91,15 +76,12 @@ const ModalSelectPrice: FC<IProps> = ({ uuid, isVisible, setIsVisible }) => {
         )();
     }, [setIsVisible]);
 
-    const toggePicker = useCallback(() => {
-        refPicker.current?.togglePicker();
-    }, []);
-
     return (
         <Modal
             backdropColor="rgba(0,0,0,.5)"
             animationIn="fadeIn"
             animationOut="fadeOut"
+            avoidKeyboard
             style={styles.styleModal}
             isVisible={isVisible}>
             <View style={styles.viewContent}>
@@ -121,7 +103,8 @@ const ModalSelectPrice: FC<IProps> = ({ uuid, isVisible, setIsVisible }) => {
                             <Text style={styles.textTitlePayment}>Chủ thẻ:</Text> Nguyễn Văn Long
                         </Text>
                         <Text>
-                            <Text style={styles.textTitlePayment}>Số tiền:</Text> {formatPrice(time * detailSong.cost)}
+                            <Text style={styles.textTitlePayment}>Số tiền:</Text>{' '}
+                            {formatPrice(Number(time) * detailSong.cost)}
                         </Text>
 
                         <View style={styles.viewActions}>
@@ -132,19 +115,18 @@ const ModalSelectPrice: FC<IProps> = ({ uuid, isVisible, setIsVisible }) => {
                     </Fragment>
                 ) : (
                     <Fragment>
-                        <Text style={styles.textHeader}>Chọn thời lượng mua nhạc:</Text>
-
-                        <TouchableOpacity activeOpacity={1} onPress={toggePicker} style={styles.dropdown}>
-                            <RNPickerSelect
-                                ref={refPicker as MutableRefObject<RNPickerSelect>}
-                                placeholder={{ label: 'Chọn thời gian mua' }}
-                                useNativeAndroidPickerStyle
-                                style={{ inputAndroid: { color: Colors.black } }}
-                                value={time}
-                                onValueChange={onValueChange}
-                                items={times}
-                            />
-                        </TouchableOpacity>
+                        <Input
+                            labelStyle={styles.labelStyle}
+                            label={`${detailSong.title} - ${formatPrice(detailSong.cost)}/phút`}
+                            returnKeyType="done"
+                            autoCapitalize="none"
+                            keyboardType="number-pad"
+                            selectionColor={Colors.subtle}
+                            value={time}
+                            onChangeText={setTime}
+                            style={styles.viewInput}
+                            placeholder="Nhập thời gian mua (phút)"
+                        />
 
                         <View style={styles.viewActions}>
                             <TouchableOpacity onPress={closeModal} style={styles.buttonActions}>
@@ -154,7 +136,9 @@ const ModalSelectPrice: FC<IProps> = ({ uuid, isVisible, setIsVisible }) => {
                                 onPress={handleBuy}
                                 disabled={!time}
                                 style={[styles.buttonActions, styles.buttonSuccess]}>
-                                <Text style={styles.textButtonActions}>Thanh toán</Text>
+                                <Text style={styles.textButtonActions}>
+                                    Thanh toán {!!time && formatPrice(Number(time) * detailSong.cost)}
+                                </Text>
                             </TouchableOpacity>
                         </View>
                     </Fragment>
@@ -167,7 +151,7 @@ const ModalSelectPrice: FC<IProps> = ({ uuid, isVisible, setIsVisible }) => {
 const styles = StyleSheet.create({
     styleModal: { margin: 0, alignItems: 'center' },
     viewContent: {
-        width: width / 1.2,
+        width: width / 1.1,
         backgroundColor: Colors.white,
         borderRadius: 3,
         paddingHorizontal: 10,
@@ -176,24 +160,15 @@ const styles = StyleSheet.create({
     itemStyle: { justifyContent: 'flex-start' },
     containerStyleSlect: { height: 40, marginTop: 10 },
     textHeader: { fontSize: 14, fontWeight: '500' },
-    viewActions: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-evenly', marginTop: 20 },
+    viewActions: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-evenly', marginTop: 10 },
     buttonActions: { backgroundColor: Colors.danger, paddingVertical: 5, paddingHorizontal: 15, borderRadius: 5 },
     textButtonActions: { fontSize: 14, fontWeight: '600', color: Colors.white },
     buttonSuccess: { backgroundColor: '#28a745' },
     codePayment: { fontWeight: '500', color: Colors.primary },
     textInfoPayment: { marginTop: 10, fontSize: 17 },
     textTitlePayment: { fontWeight: '500', color: Colors.darkorange },
-    dropdown: {
-        marginTop: 10,
-        borderColor: '#757575',
-        borderWidth: 0.5,
-        borderRadius: 5,
-        paddingHorizontal: 10,
-        ...Platform.select({
-            android: { paddingVertical: 0 },
-            ios: { paddingVertical: 10 },
-        }),
-    },
+    viewInput: { fontSize: 15, color: Colors.subtle },
+    labelStyle: { color: Colors.subtle, fontSize: 14, fontWeight: '500' },
 });
 
 export default memo(ModalSelectPrice);

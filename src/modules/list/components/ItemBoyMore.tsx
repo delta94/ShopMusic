@@ -1,12 +1,11 @@
-import React, { FC, memo, MutableRefObject, useCallback, useMemo, useRef } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
-import RNPickerSelect, { Item } from 'react-native-picker-select';
-import range from 'lodash/range';
+import React, { FC, memo, useCallback } from 'react';
+import { StyleSheet } from 'react-native';
 import update from 'immer';
 
 import { Song } from 'types/Songs/SongResponse';
 import { Colors } from 'styles/global.style';
 import { formatPrice } from 'utils/customs/formatPrice';
+import { Input } from 'react-native-elements';
 
 interface IProps {
     item: Song;
@@ -21,27 +20,12 @@ interface ItemBuy {
 }
 
 const ItemBoyMore: FC<IProps> = ({ item, listBuy, setListBuy }) => {
-    const refPicker = useRef<RNPickerSelect>();
-
-    const times = useMemo<Item[]>(
-        () =>
-            (Object.keys(item).length > 0 ? range(Math.ceil(item.time / 60)) : []).map(i => ({
-                label: `${i + 1} phút (${formatPrice((i + 1) * item.cost)})`,
-                value: i + 1,
-            })),
-        [item],
-    );
-
-    const toggePicker = useCallback(() => {
-        refPicker.current?.togglePicker();
-    }, []);
-
     const onValueChange = useCallback(
-        (value: number) => {
+        (value: string) => {
             const newListBuy = update(listBuy, darf => {
                 const findIndex = darf.findIndex(i => i.uuid === item.uuid);
                 if (findIndex !== -1) {
-                    darf[findIndex].time = value;
+                    darf[findIndex].time = Number(value);
                 }
             });
 
@@ -51,36 +35,24 @@ const ItemBoyMore: FC<IProps> = ({ item, listBuy, setListBuy }) => {
     );
 
     return (
-        <View>
-            <Text>{item.title}</Text>
-
-            <TouchableOpacity activeOpacity={1} onPress={toggePicker} style={styles.dropdown}>
-                <RNPickerSelect
-                    ref={refPicker as MutableRefObject<RNPickerSelect>}
-                    placeholder={{ label: 'Chọn thời gian mua' }}
-                    useNativeAndroidPickerStyle
-                    style={{ inputAndroid: { color: Colors.black } }}
-                    value={listBuy.find(i => i.uuid === item.uuid)?.time}
-                    onValueChange={onValueChange}
-                    items={times}
-                />
-            </TouchableOpacity>
-        </View>
+        <Input
+            labelStyle={styles.labelStyle}
+            label={`${item.title} - ${formatPrice(item.cost)}/phút`}
+            returnKeyType="done"
+            autoCapitalize="none"
+            keyboardType="number-pad"
+            selectionColor={Colors.subtle}
+            value={String(listBuy.find(i => i.uuid === item.uuid)?.time || '')}
+            onChangeText={onValueChange}
+            style={styles.viewInput}
+            placeholder="Nhập thời gian mua (phút)"
+        />
     );
 };
 
 const styles = StyleSheet.create({
-    dropdown: {
-        marginTop: 10,
-        borderColor: '#757575',
-        borderWidth: 0.5,
-        borderRadius: 5,
-        paddingHorizontal: 10,
-        ...Platform.select({
-            android: { paddingVertical: 0 },
-            ios: { paddingVertical: 10 },
-        }),
-    },
+    viewInput: { fontSize: 15, color: Colors.subtle },
+    labelStyle: { color: Colors.subtle, fontSize: 14, fontWeight: '500' },
 });
 
 export default memo(ItemBoyMore);

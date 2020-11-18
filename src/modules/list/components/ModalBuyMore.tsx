@@ -1,4 +1,4 @@
-import React, { FC, Fragment, memo, useCallback, useEffect, useState } from 'react';
+import React, { FC, Fragment, memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { View, Text, StyleSheet, Dimensions, FlatList, TouchableOpacity, Alert } from 'react-native';
 import Modal from 'react-native-modal';
 import { useDispatch, useSelector } from 'react-redux';
@@ -56,12 +56,19 @@ const ModalBuyMore: FC<IProps> = ({ isVisible, setIsVisible, type }) => {
         }
     }, [songs, songsDemo, type]);
 
+    const totalCost = useMemo(() => {
+        const listBuyFilter = listBuy.filter(item => !!item.time);
+        if (listBuyFilter.length > 0) {
+            return sumBy(listBuyFilter, o => o.cost * o.time);
+        }
+        return 0;
+    }, [listBuy]);
+
     const handleBuy = useCallback(async () => {
         try {
             const listBuyFilter = listBuy.filter(item => !!item.time);
 
             if (listBuyFilter.length > 0) {
-                const totalCost = sumBy(listBuyFilter, o => o.cost * o.time);
                 setTotal(totalCost);
                 const res = await dispatch<any>(
                     listActions.buyList({
@@ -74,7 +81,7 @@ const ModalBuyMore: FC<IProps> = ({ isVisible, setIsVisible, type }) => {
                 Alert.alert('Thông báo', 'Phải chọn thời gian của 1 bài hát');
             }
         } catch (error) {}
-    }, [dispatch, listBuy]);
+    }, [dispatch, listBuy, totalCost]);
 
     const copyText = useCallback(async (text: string) => {
         await Clipboard.setString(text);
@@ -93,6 +100,7 @@ const ModalBuyMore: FC<IProps> = ({ isVisible, setIsVisible, type }) => {
         <Modal
             backdropColor="rgba(0,0,0,.5)"
             animationIn="fadeIn"
+            avoidKeyboard
             animationOut="fadeOut"
             style={styles.styleModal}
             isVisible={isVisible}>
@@ -139,7 +147,9 @@ const ModalBuyMore: FC<IProps> = ({ isVisible, setIsVisible, type }) => {
                                 <Text style={styles.textButtonActions}>Đóng</Text>
                             </TouchableOpacity>
                             <TouchableOpacity onPress={handleBuy} style={[styles.buttonActions, styles.buttonSuccess]}>
-                                <Text style={styles.textButtonActions}>Thanh toán</Text>
+                                <Text style={styles.textButtonActions}>
+                                    Thanh toán {!!totalCost && formatPrice(totalCost)}
+                                </Text>
                             </TouchableOpacity>
                         </View>
                     </Fragment>
@@ -152,7 +162,7 @@ const ModalBuyMore: FC<IProps> = ({ isVisible, setIsVisible, type }) => {
 const styles = StyleSheet.create({
     styleModal: { margin: 0, alignItems: 'center' },
     viewContent: {
-        width: width / 1.2,
+        width: width / 1.1,
         backgroundColor: Colors.white,
         borderRadius: 3,
         paddingHorizontal: 10,
@@ -160,7 +170,7 @@ const styles = StyleSheet.create({
         maxHeight: height / 2,
     },
     itemSeparatorComponent: { height: 10 },
-    viewActions: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-evenly', marginTop: 20 },
+    viewActions: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-evenly', marginTop: 10 },
     buttonActions: { backgroundColor: Colors.danger, paddingVertical: 5, paddingHorizontal: 15, borderRadius: 5 },
     textButtonActions: { fontSize: 14, fontWeight: '600', color: Colors.white },
     buttonSuccess: { backgroundColor: '#28a745' },
