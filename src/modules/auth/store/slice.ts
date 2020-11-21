@@ -60,6 +60,12 @@ const auth = createSlice({
             state.user.info = payload;
         });
         //
+        builder.addCase(operations.logout.pending, () => {});
+        builder.addCase(operations.logout.rejected, () => {});
+        builder.addCase(operations.logout.fulfilled, (state, { payload }) => {
+            state.isLogin = false;
+        });
+        //
     },
 });
 

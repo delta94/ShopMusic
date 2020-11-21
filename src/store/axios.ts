@@ -1,6 +1,12 @@
+import debounce from 'lodash/debounce';
 import pickBy from 'lodash/pickBy';
 import axios, { AxiosInstance } from 'axios';
 import qs from 'qs';
+import { Alert } from 'react-native';
+
+import store from 'store';
+import { actions as actionsAuth } from 'modules/auth/store';
+import NavigationService from 'navigation/NavigationService';
 
 export const instance = (baseURL: string): AxiosInstance => {
     const axiosInstance = axios.create({
@@ -23,6 +29,18 @@ export const instance = (baseURL: string): AxiosInstance => {
             return response;
         },
         function (error) {
+            if (error && error.response && error.response.status && error.response.status === 401) {
+                store.dispatch(actionsAuth.logout()).then(() =>
+                    debounce(() => {
+                        Alert.alert(
+                            'Thông báo',
+                            'Token đã hết hạn hoặc bạn đã đăng nhập tài khoản ở thiết bị khác. Vui lòng đăng nhập lại.',
+                        );
+                        NavigationService.navigate('HomeScreen');
+                    }, 1000)(),
+                );
+            }
+
             return Promise.reject(error);
         },
     );

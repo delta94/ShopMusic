@@ -1,7 +1,14 @@
+import { Category } from 'types/Music/MusicResponse';
+
 export interface SongResponse {
     code: number;
     message: string;
     data: SongResult;
+}
+
+export interface SongsCategory {
+    category: Category;
+    content: SongResult;
 }
 
 export interface SongResult {

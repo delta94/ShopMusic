@@ -28,14 +28,13 @@ interface ItemBuy {
     time: number;
 }
 
-const ModalBuyMore: FC<IProps> = ({ isVisible, setIsVisible, type }) => {
+const ModalBuyMore: FC<IProps> = ({ isVisible, setIsVisible }) => {
     const dispatch = useDispatch();
     const [listBuy, setListBuy] = useState<ItemBuy[]>([]);
     const [codePayment, setCodePayment] = useState<string>('');
     const [total, setTotal] = useState<number>(0);
 
-    const songs = useSelector<RootState, Song[]>(state => state.list.songs);
-    const songsDemo = useSelector<RootState, Song[]>(state => state.list.songsDemo);
+    const listSongSelect = useSelector<RootState, Song[]>(state => state.list.listSongSelect);
 
     const renderItem = useCallback(
         ({ item }) => <ItemBoyMore setListBuy={setListBuy} listBuy={listBuy} item={item} />,
@@ -49,12 +48,8 @@ const ModalBuyMore: FC<IProps> = ({ isVisible, setIsVisible, type }) => {
     }, [setIsVisible]);
 
     useEffect(() => {
-        if (type === 'song_demos') {
-            setListBuy(songsDemo.map(item => ({ uuid: item.uuid, cost: item.cost, time: 0 })));
-        } else {
-            setListBuy(songs.map(item => ({ uuid: item.uuid, cost: item.cost, time: 0 })));
-        }
-    }, [songs, songsDemo, type]);
+        setListBuy(listSongSelect.map(item => ({ uuid: item.uuid, cost: item.cost, time: 0 })));
+    }, [listSongSelect]);
 
     const totalCost = useMemo(() => {
         const listBuyFilter = listBuy.filter(item => !!item.time);
@@ -138,7 +133,7 @@ const ModalBuyMore: FC<IProps> = ({ isVisible, setIsVisible, type }) => {
                             showsVerticalScrollIndicator={false}
                             ItemSeparatorComponent={itemSeparatorComponent}
                             automaticallyAdjustContentInsets
-                            data={type === 'song_demos' ? songsDemo : songs}
+                            data={listSongSelect}
                             renderItem={renderItem}
                         />
 

@@ -85,3 +85,5 @@ export const changePassword = (body: { password: string; oldPassword: string }):
 
         return Promise.reject();
     });
+
+export const logout = () => AsyncStorage.removeItem('token');

@@ -16,6 +16,8 @@ import Palyer from './Palyer';
 import { actions as actionsList } from 'modules/list/store';
 import ModalSelectPrice from 'components/ModalSelectPrice';
 import NavigationService from 'navigation/NavigationService';
+import { Song } from 'types/Songs/SongResponse';
+import { getDetailSong } from '../store/services';
 
 const { width } = Dimensions.get('window');
 
@@ -24,6 +26,7 @@ const HomeScreen = () => {
     const track = useSelector<RootState, Track>(state => state.home.track);
     const isLogin = useSelector<RootState, boolean>(state => state.auth.isLogin);
     const [isVisible, setIsVisible] = useState<boolean>(false);
+    const [detail, setDetail] = useState<Song>({} as Song);
 
     const { top } = useSafeAreaInsets();
 
@@ -66,6 +69,19 @@ const HomeScreen = () => {
         setIsVisible(true);
     }, [isLogin]);
 
+    const fetchDetail = useCallback(async () => {
+        try {
+            if (track.id) {
+                const res = await getDetailSong(track.id);
+                setDetail(res);
+            }
+        } catch (error) {}
+    }, [track]);
+
+    useEffect(() => {
+        fetchDetail();
+    }, [fetchDetail]);
+
     return (
         <FastImage source={{ uri: track.artwork }} style={[styles.container, { paddingTop: top }]}>
             <Fragment>
@@ -85,9 +101,11 @@ const HomeScreen = () => {
                 </View>
                 <Palyer />
 
-                <TouchableOpacity onPress={openModal} style={styles.buttonBought}>
-                    <Text style={styles.textBought}>Mua</Text>
-                </TouchableOpacity>
+                {Number(detail.type) === 2 && isLogin && (
+                    <TouchableOpacity onPress={openModal} style={styles.buttonBought}>
+                        <Text style={styles.textBought}>Mua</Text>
+                    </TouchableOpacity>
+                )}
 
                 <ModalSelectPrice uuid={track.id} isVisible={isVisible} setIsVisible={setIsVisible} />
             </Fragment>

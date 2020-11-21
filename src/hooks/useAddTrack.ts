@@ -22,70 +22,65 @@ export const useAddTrack = () => {
 
     const songs = useSelector<RootState, Song[]>(state => state.list.songs);
     const songsDemo = useSelector<RootState, Song[]>(state => state.list.songsDemo);
+    const songsCategory = useSelector<RootState, Song[]>(state => state.list.songsCategory);
+
     const isLogin = useSelector<RootState, boolean>(state => state.auth.isLogin);
     const token = useSelector<RootState, string>(state => state.auth.token);
 
-    const addPlayDemo = useCallback(async () => {
-        const listPlays = await TrackPlayer.getQueue();
+    const addTrack = useCallback(
+        async (listSongs: Song[] = []) => {
+            const listPlays = await TrackPlayer.getQueue();
 
-        if (songsDemo.length > 0) {
-            const songsCompare: Track[] = songsDemo.map(item => ({
-                id: `${item.uuid}`,
-                url: '',
-                type: 'default',
-                title: item.title,
-                artist: item.description || item.title,
-                artwork: item.thumb,
-                duration: item.time,
-            }));
-
-            const listDiff = differenceBy(songsCompare, listPlays, 'id');
-
-            if (listDiff.length > 0) {
-                const allSongsDemoMp3 = await Promise.all(listDiff.map(item => getFileMp3Songs(item.id)));
-
-                const listNewSongsDemo: Track[] = listDiff.map((item, index) => ({
-                    ...item,
-                    url: allSongsDemoMp3[index],
+            if (listSongs.length > 0) {
+                const songsCompare: Track[] = listSongs.map(item => ({
+                    id: `${item.uuid}`,
+                    url: '',
+                    type: 'default',
+                    title: item.title,
+                    artist: item.description || item.title,
+                    artwork: item.thumb,
                 }));
 
-                await TrackPlayer.add(listNewSongsDemo);
+                const listDiff = differenceBy(songsCompare, listPlays, 'id');
+
+                if (listDiff.length > 0) {
+                    const allSongsDemoMp3 = await Promise.all(listDiff.map(item => getFileMp3Songs(item.id)));
+
+                    const listNewSongsDemo: Track[] = listDiff.map((item, index) => ({
+                        ...item,
+                        url: allSongsDemoMp3[index],
+                    }));
+
+                    await TrackPlayer.add(
+                        listNewSongsDemo.map(i => ({ ...i, ...(isLogin && { headers: { token } }) })),
+                    );
+                }
             }
-        }
-    }, [songsDemo]);
+        },
+        [isLogin, token],
+    );
+
+    const addPlayDemo = useCallback(async () => {
+        addTrack(songsDemo);
+    }, [addTrack, songsDemo]);
+
+    const addPlaySongCategory = useCallback(async () => {
+        addTrack(songsCategory);
+    }, [addTrack, songsCategory]);
 
     const addPlaySongs = useCallback(async () => {
-        const listPlays = await TrackPlayer.getQueue();
-
-        if (songs.length > 0 && isLogin) {
-            const songsCompare: Track[] = songs.map(item => ({
-                id: `${item.uuid}`,
-                url: '',
-                type: 'default',
-                title: item.title,
-                artist: item.description || item.title,
-                artwork: item.thumb,
-                duration: item.time,
-            }));
-
-            const listDiff = differenceBy(songsCompare, listPlays, 'id');
-
-            if (listDiff.length > 0) {
-                const allSongsDemoMp3 = await Promise.all(listDiff.map(item => getFileMp3Songs(item.id)));
-
-                const listNewSongsDemo: Track[] = listDiff.map((item, index) => ({
-                    ...item,
-                    url: allSongsDemoMp3[index],
-                }));
-
-                await TrackPlayer.add(listNewSongsDemo.map(i => ({ ...i, headers: { token } })));
-            }
+        if (isLogin) {
+            addTrack(songs);
         }
-    }, [isLogin, songs, token]);
+    }, [addTrack, isLogin, songs]);
 
     useEffect(() => {
         addPlaySongs();
     }, [addPlaySongs]);
+
+    useEffect(() => {
+        addPlaySongCategory();
+    }, [addPlaySongCategory]);
 
     useEffect(() => {
         addPlayDemo();

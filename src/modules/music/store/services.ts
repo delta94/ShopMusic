@@ -1,6 +1,13 @@
 import { apiAxios } from 'store/axios';
+import { ResponseCommon } from 'types/Common';
 
-import { HomeResponse } from 'types/Home/HomeResponse';
+import { Category } from 'types/Music/MusicResponse';
 
-export const fetchStatistic = (): Promise<HomeResponse> =>
-    apiAxios.get<HomeResponse>('https://hrm-api.megaads.vn/statistic').then(res => res.data);
+export const fetchCategories = (): Promise<Category[]> =>
+    apiAxios.get<ResponseCommon<Category[]>>('music/categories').then(res => {
+        if (res.data.message === 'success') {
+            return res.data.data;
+        }
+
+        return Promise.reject();
+    });

@@ -35,9 +35,11 @@ const ListScreen: FC<IProps> = ({ navigation, route }) => {
 
     const isLogin = useSelector<RootState, boolean>(state => state.auth.isLogin);
     const songs = useSelector<RootState, Song[]>(state => state.list.songs);
-    const songsDemo = useSelector<RootState, SongDemo[]>(state => state.list.songsDemo);
+    const songsCategory = useSelector<RootState, Song[]>(state => state.list.songsCategory);
     const hasNextSongs = useSelector<RootState, boolean>(state => state.list.hasNextSongs);
     const hasNextSongsDemo = useSelector<RootState, boolean>(state => state.list.hasNextSongsDemo);
+    const listSongSelect = useSelector<RootState, Song[]>(state => state.list.listSongSelect);
+    const selectMultiBuy = useSelector<RootState, boolean>(state => state.list.selectMultiBuy);
 
     const [loading, setLoading] = useState<boolean>(true);
     const [refreshing, setRefreshing] = useState<boolean>(false);
@@ -45,7 +47,7 @@ const ListScreen: FC<IProps> = ({ navigation, route }) => {
     const [isVisible, setIsVisible] = useState<boolean>(false);
 
     const { params } = route;
-    const { type } = params;
+    const { type, category_id } = params;
 
     const changeStatusBar = useCallback(() => {
         StatusBar.setBarStyle('light-content', true);
@@ -53,7 +55,10 @@ const ListScreen: FC<IProps> = ({ navigation, route }) => {
 
     useFocusEffect(changeStatusBar);
 
-    const renderItem = useCallback(({ item }) => <ItemList item={item} type={type} />, [type]);
+    const renderItem = useCallback(
+        ({ item }) => <ItemList checked={listSongSelect.some(i => i.uuid === item.uuid)} item={item} type={type} />,
+        [listSongSelect, type],
+    );
     const listHeaderComponent = useCallback(
         () => <Text style={styles.textHeaderList}>Danh sách nhạc {type === 'song_demos' ? 'nghe thử' : 'đã mua'}</Text>,
         [type],
@@ -75,19 +80,21 @@ const ListScreen: FC<IProps> = ({ navigation, route }) => {
         (reFresh?: boolean) => {
             try {
                 reFresh ? setRefreshing(true) : setLoading(true);
-                type === 'songs' ? dispatch(actionsList.fetchSongs(0)) : dispatch(actionsList.fetchSongsDemo(0));
+                type === 'songs'
+                    ? dispatch(actionsList.fetchSongs(0))
+                    : dispatch(actionsList.fetchSongsByCategoryId({ category_id, page: 0 }));
             } finally {
                 reFresh ? setRefreshing(false) : setLoading(false);
             }
         },
-        [dispatch, type],
+        [category_id, dispatch, type],
     );
 
     useEffect(() => {
         fetchSongs();
     }, [fetchSongs]);
 
-    const data = useMemo(() => (type === 'songs' ? songs : songsDemo), [songs, songsDemo, type]);
+    const data = useMemo(() => (type === 'songs' ? songs : songsCategory), [songs, songsCategory, type]);
 
     const onRefresh = useCallback(() => {
         fetchSongs(true);
@@ -98,18 +105,32 @@ const ListScreen: FC<IProps> = ({ navigation, route }) => {
         if (checkLoadMore) {
             setPage(page + 1);
             type === 'songs'
-                ? dispatch(actionsList.fetchSongs(page + 1))
-                : dispatch(actionsList.fetchSongsDemo(page + 1));
+                ? dispatch(actionsList.fetchMoreSongs(page + 1))
+                : dispatch(actionsList.fetchMoreSongsByCategoryId({ category_id, page: page + 1 }));
         }
-    }, [checkLoadMore, dispatch, page, type]);
+    }, [category_id, checkLoadMore, dispatch, page, type]);
+
+    useEffect(() => {
+        if (!isVisible) {
+            dispatch(actionsList.setSelectBuyMulti(false));
+            dispatch(actionsList.setListSelect([]));
+        }
+    }, [dispatch, isVisible]);
 
     const openModalBuyMore = useCallback(() => {
         if (!isLogin) {
             navigation.navigate('LoginScreen');
             return;
         }
-        setIsVisible(true);
-    }, [isLogin, navigation]);
+
+        if (!selectMultiBuy) {
+            dispatch(actionsList.setSelectBuyMulti(true));
+        } else if (listSongSelect.length > 0) {
+            setIsVisible(true);
+        } else {
+            dispatch(actionsList.setSelectBuyMulti(false));
+        }
+    }, [dispatch, isLogin, listSongSelect.length, navigation, selectMultiBuy]);
 
     return (
         <Fragment>
@@ -127,7 +148,9 @@ const ListScreen: FC<IProps> = ({ navigation, route }) => {
                 </TouchableOpacity>
 
                 <TouchableOpacity onPress={openModalBuyMore} style={styles.buttonBuyMore}>
-                    <Text style={styles.textBuyMore}>Mua nhiều</Text>
+                    <Text style={styles.textBuyMore}>
+                        {!selectMultiBuy ? 'Mua nhiều' : listSongSelect.length > 0 ? 'Mua' : 'Huỷ'}
+                    </Text>
                 </TouchableOpacity>
             </View>
 
