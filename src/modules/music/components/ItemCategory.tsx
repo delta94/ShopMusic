@@ -13,8 +13,8 @@ interface IProps {
 
 const ItemCategory: FC<IProps> = ({ item }) => {
     const handlePress = useCallback(() => {
-        NavigationService.navigate('ListScreen', { category_id: item.uuid });
-    }, [item.uuid]);
+        NavigationService.navigate('ListScreen', { category_id: item.uuid, title: item.title });
+    }, [item]);
 
     return (
         <TouchableOpacity onPress={handlePress} style={styles.container}>

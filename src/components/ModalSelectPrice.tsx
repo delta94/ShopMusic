@@ -38,7 +38,7 @@ const ModalSelectPrice: FC<IProps> = ({ uuid, isVisible, setIsVisible }) => {
 
     useEffect(() => {
         if (!isVisible) {
-            setTime(0);
+            setTime('');
             setCodePayment('');
         }
     }, [isVisible]);
@@ -52,8 +52,8 @@ const ModalSelectPrice: FC<IProps> = ({ uuid, isVisible, setIsVisible }) => {
             const res = await dispatch<any>(
                 actionsHome.buySong({
                     time: Number(time) * 60,
-                    cost: detailSong.cost,
-                    uuid: detailSong.parent ? detailSong.parent : detailSong.uuid,
+                    cost: detailSong.cost * Number(time),
+                    uuid: detailSong.uuid,
                 }),
             ).then(unwrapResult);
 

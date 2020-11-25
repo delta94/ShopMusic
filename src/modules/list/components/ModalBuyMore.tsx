@@ -68,7 +68,11 @@ const ModalBuyMore: FC<IProps> = ({ isVisible, setIsVisible }) => {
                 const res = await dispatch<any>(
                     listActions.buyList({
                         totalCost,
-                        items: listBuyFilter.map(item => ({ uuid: item.uuid, cost: item.cost, time: item.time * 60 })),
+                        items: listBuyFilter.map(item => ({
+                            uuid: item.uuid,
+                            cost: item.cost * item.time,
+                            time: item.time * 60,
+                        })),
                     }),
                 ).then(unwrapResult);
                 setCodePayment(res);

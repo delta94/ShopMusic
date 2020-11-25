@@ -47,7 +47,7 @@ const ListScreen: FC<IProps> = ({ navigation, route }) => {
     const [isVisible, setIsVisible] = useState<boolean>(false);
 
     const { params } = route;
-    const { type, category_id } = params;
+    const { type, category_id, title } = params;
 
     const changeStatusBar = useCallback(() => {
         StatusBar.setBarStyle('light-content', true);
@@ -60,8 +60,12 @@ const ListScreen: FC<IProps> = ({ navigation, route }) => {
         [listSongSelect, type],
     );
     const listHeaderComponent = useCallback(
-        () => <Text style={styles.textHeaderList}>Danh sách nhạc {type === 'song_demos' ? 'nghe thử' : 'đã mua'}</Text>,
-        [type],
+        () => (
+            <Text style={styles.textHeaderList}>
+                Danh sách nhạc {type === 'songs' ? 'đã mua' : `nghe thử ${title}`}
+            </Text>
+        ),
+        [title, type],
     );
     const itemSeparatorComponent = useCallback(() => <View style={styles.itemSeparatorComponent} />, []);
 
