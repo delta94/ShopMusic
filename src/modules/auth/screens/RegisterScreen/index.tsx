@@ -72,8 +72,8 @@ const RegisterScreen: FC<IProps> = ({ navigation }) => {
                     500,
                 )();
                 navigation.goBack();
-            } catch {
-                debounce(() => Alert.alert('Thông báo', 'Đăng ký lỗi!'), 500)();
+            } catch ({ message }) {
+                debounce(() => Alert.alert('Thông báo', message || 'Đăng ký lỗi!'), 500)();
             } finally {
                 setLoading(false);
             }
@@ -81,9 +81,10 @@ const RegisterScreen: FC<IProps> = ({ navigation }) => {
         [dispatch, navigation],
     );
 
-    const { submitForm, handleBlur, handleChange, errors, values } = useFormik<typeof initialValues>({
+    const { submitForm, handleBlur, handleChange, errors, values, touched } = useFormik<typeof initialValues>({
         initialValues,
         validationSchema,
+        validateOnChange: true,
         onSubmit: onSubmitForm,
     });
 
@@ -116,7 +117,7 @@ const RegisterScreen: FC<IProps> = ({ navigation }) => {
                     label="Email"
                     errorStyle={styles.errorStyle}
                     labelStyle={styles.labelStyle}
-                    errorMessage={errors.email ? errors.email : undefined}
+                    errorMessage={touched.email && errors.email ? errors.email : undefined}
                     onSubmitEditing={() => refInputName.current?.focus()}
                 />
 
@@ -132,7 +133,7 @@ const RegisterScreen: FC<IProps> = ({ navigation }) => {
                     label="Họ và tên"
                     errorStyle={styles.errorStyle}
                     labelStyle={styles.labelStyle}
-                    errorMessage={errors.name ? errors.name : undefined}
+                    errorMessage={touched.name && errors.name ? errors.name : undefined}
                     onSubmitEditing={() => refInputPassword.current?.focus()}
                 />
 
@@ -158,7 +159,7 @@ const RegisterScreen: FC<IProps> = ({ navigation }) => {
                     labelStyle={styles.labelStyle}
                     errorStyle={styles.errorStyle}
                     onSubmitEditing={() => refInputConfirmPass.current?.focus()}
-                    errorMessage={errors.password ? errors.password : undefined}
+                    errorMessage={touched.password && errors.password ? errors.password : undefined}
                 />
 
                 <Input
@@ -183,7 +184,9 @@ const RegisterScreen: FC<IProps> = ({ navigation }) => {
                     labelStyle={styles.labelStyle}
                     errorStyle={styles.errorStyle}
                     onSubmitEditing={submitForm}
-                    errorMessage={errors.password_confirm ? errors.password_confirm : undefined}
+                    errorMessage={
+                        touched.password_confirm && errors.password_confirm ? errors.password_confirm : undefined
+                    }
                 />
 
                 <Button

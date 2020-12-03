@@ -15,6 +15,8 @@ import ChangePasswordScreen from 'modules/auth/screens/ChangePassword';
 import { useMessaging } from 'hooks/useMessaging';
 import { useAddTrack } from 'hooks/useAddTrack';
 import { Colors } from 'styles/global.style';
+import EditProfileScreen from 'modules/profile/screens/EditProfileScreen';
+import ProfileScreen from 'modules/profile/screens/ProfileScreen';
 
 enableScreens();
 const Stack = createNativeStackNavigator();
@@ -65,6 +67,15 @@ const NavigationApp = () => {
                     component={LoginScreen}
                 />
                 <Stack.Screen
+                    options={{
+                        title: 'Chỉnh sửa thông tin',
+                        headerStyle: { backgroundColor: Colors.white },
+                        headerTintColor: Colors.subtle,
+                    }}
+                    name="EditProfileScreen"
+                    component={EditProfileScreen}
+                />
+                <Stack.Screen
                     options={{ title: 'Thay đổi mật khẩu', headerHideShadow: true, headerShown: false }}
                     name="ChangePasswordScreen"
                     component={ChangePasswordScreen}
@@ -84,6 +95,7 @@ const NavigationApp = () => {
                     name="ChatScreen"
                     component={ChatScreen}
                 />
+                <Stack.Screen options={{ headerShown: false }} name="ProfileScreen" component={ProfileScreen} />
             </Stack.Navigator>
         </NavigationContainer>
     );

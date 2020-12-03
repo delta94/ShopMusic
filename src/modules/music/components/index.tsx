@@ -117,9 +117,10 @@ const MusicScreen: FC<IProps> = ({ navigation }) => {
                     <ItemMusic
                         onPress={() => goToListScreen('songs')}
                         image_url="https://photo-resize-zmp3.zadn.vn/w480_r1x1_jpeg/cover/d/8/9/9/d8996a26339f7b7a5d596666f03edac0.jpg"
-                        title="Danh sách nhạc đã mua"
+                        title="Danh sách nhạc đã full"
                     />
                 )}
+                <View style={styles.viewFooter} />
             </ScrollView>
         </Fragment>
     );
@@ -154,6 +155,7 @@ const styles = StyleSheet.create({
     },
     flexRow: { flexDirection: 'row', justifyContent: 'flex-end' },
     textCode: { color: Colors.white, fontWeight: '700' },
+    viewFooter: { height: 100 },
 });
 
 export default MusicScreen;

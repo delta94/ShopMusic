@@ -1,9 +1,8 @@
 import { NavigationProp, useFocusEffect } from '@react-navigation/native';
 import { useFormik } from 'formik';
 import React, { FC, Fragment, memo, MutableRefObject, useCallback, useRef, useState } from 'react';
-import { Alert, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, StatusBar, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import { Button, Icon, Input } from 'react-native-elements';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useDispatch } from 'react-redux';
 import * as Yup from 'yup';
 import { unwrapResult } from '@reduxjs/toolkit';
@@ -28,7 +27,6 @@ interface IProps {
 const ChangePasswordScreen: FC<IProps> = ({ navigation }) => {
     const dispatch = useDispatch();
     const refInputPassword = useRef<Input>();
-    const { top } = useSafeAreaInsets();
 
     const [secureTextPasswordNew, setSecureTextPasswordNew] = useState<boolean>(true);
     const [secureTextPassword, setSecureTextPassword] = useState<boolean>(true);
@@ -56,7 +54,7 @@ const ChangePasswordScreen: FC<IProps> = ({ navigation }) => {
         [dispatch, navigation],
     );
 
-    const { submitForm, handleBlur, handleChange, errors, values } = useFormik<typeof initialValues>({
+    const { submitForm, handleBlur, handleChange, errors, values, touched } = useFormik<typeof initialValues>({
         initialValues,
         validationSchema,
         onSubmit: onSubmitForm,
@@ -80,7 +78,6 @@ const ChangePasswordScreen: FC<IProps> = ({ navigation }) => {
 
             <KeyboardAwareScrollView style={[styles.container]}>
                 <Input
-                    autoFocus
                     returnKeyType="next"
                     autoCapitalize="none"
                     value={values.oldPassword}
@@ -92,7 +89,7 @@ const ChangePasswordScreen: FC<IProps> = ({ navigation }) => {
                     label="Mật khẩu cũ"
                     errorStyle={styles.errorStyle}
                     labelStyle={styles.labelStyle}
-                    errorMessage={errors.oldPassword ? errors.oldPassword : undefined}
+                    errorMessage={touched.oldPassword && errors.oldPassword ? errors.oldPassword : undefined}
                     rightIcon={
                         <TouchableOpacity onPress={toggleSecurePasswordNew}>
                             <Icon
@@ -127,7 +124,7 @@ const ChangePasswordScreen: FC<IProps> = ({ navigation }) => {
                     labelStyle={styles.labelStyle}
                     errorStyle={styles.errorStyle}
                     onSubmitEditing={submitForm}
-                    errorMessage={errors.password ? errors.password : undefined}
+                    errorMessage={touched.password && errors.password ? errors.password : undefined}
                 />
 
                 <Button

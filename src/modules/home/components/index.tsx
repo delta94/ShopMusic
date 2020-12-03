@@ -3,26 +3,27 @@ import ImageCustom from 'components/ImageCustom';
 import React, { Fragment, memo, useCallback, useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Dimensions, StatusBar, TouchableOpacity } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import TrackPlayer, { Track } from 'react-native-track-player';
-import { useDispatch, useSelector } from 'react-redux';
-import RNBootSplash from 'react-native-bootsplash';
-import NetInfo from '@react-native-community/netinfo';
+import { Track } from 'react-native-track-player';
+import { useSelector } from 'react-redux';
 import { BlurView } from '@react-native-community/blur';
 import FastImage from 'react-native-fast-image';
 
 import { RootState } from 'store';
 import { Colors } from 'styles/global.style';
 import Palyer from './Palyer';
-import { actions as actionsList } from 'modules/list/store';
 import ModalSelectPrice from 'components/ModalSelectPrice';
 import NavigationService from 'navigation/NavigationService';
 import { Song } from 'types/Songs/SongResponse';
 import { getDetailSong } from '../store/services';
+import { useEventTrack } from 'hooks/useEventTrack';
+import { useAutoNext } from 'hooks/useAutoNext';
 
 const { width } = Dimensions.get('window');
 
 const HomeScreen = () => {
-    const dispatch = useDispatch();
+    useEventTrack();
+    // useAutoNext();
+
     const track = useSelector<RootState, Track>(state => state.home.track);
     const isLogin = useSelector<RootState, boolean>(state => state.auth.isLogin);
     const [isVisible, setIsVisible] = useState<boolean>(false);
@@ -35,30 +36,6 @@ const HomeScreen = () => {
     }, []);
 
     useFocusEffect(changeStatusBar);
-
-    const setup = useCallback(async () => {
-        await TrackPlayer.setupPlayer({});
-        await TrackPlayer.updateOptions({
-            stopWithApp: true,
-            capabilities: [
-                TrackPlayer.CAPABILITY_PLAY,
-                TrackPlayer.CAPABILITY_PAUSE,
-                TrackPlayer.CAPABILITY_SEEK_TO,
-                TrackPlayer.CAPABILITY_SKIP_TO_NEXT,
-                TrackPlayer.CAPABILITY_SKIP_TO_PREVIOUS,
-            ],
-        });
-        await NetInfo.fetch();
-        RNBootSplash.hide();
-    }, []);
-
-    useEffect(() => {
-        setup();
-    }, [setup]);
-
-    useEffect(() => {
-        dispatch(actionsList.fetchSongsDemo(0));
-    }, [dispatch]);
 
     const openModal = useCallback(() => {
         if (!isLogin) {
@@ -103,7 +80,7 @@ const HomeScreen = () => {
 
                 {Number(detail.type) === 2 && isLogin && (
                     <TouchableOpacity onPress={openModal} style={styles.buttonBought}>
-                        <Text style={styles.textBought}>Mua</Text>
+                        <Text style={styles.textBought}>Full</Text>
                     </TouchableOpacity>
                 )}
 

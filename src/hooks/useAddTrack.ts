@@ -1,12 +1,12 @@
 import { useCallback, useEffect } from 'react';
-import TrackPlayer, { Track, useTrackPlayerProgress } from 'react-native-track-player';
-import { useSelector } from 'react-redux';
+import TrackPlayer, { Track } from 'react-native-track-player';
+import { useDispatch, useSelector } from 'react-redux';
 import differenceBy from 'lodash/differenceBy';
-import last from 'lodash/last';
 
 import { RootState } from 'store';
 import { apiAxios } from 'store/axios';
 import { Song } from 'types/Songs/SongResponse';
+import { actions as actionsHome } from 'modules/home/store';
 
 export interface SongResponse {
     code: number;
@@ -18,7 +18,7 @@ const getFileMp3Songs = (uuid: string): Promise<string> =>
     apiAxios.get<SongResponse>(`music/getResource/${uuid}`).then(res => res.data.data);
 
 export const useAddTrack = () => {
-    const { duration, position } = useTrackPlayerProgress();
+    const dispatch = useDispatch();
 
     const songs = useSelector<RootState, Song[]>(state => state.list.songs);
     const songsDemo = useSelector<RootState, Song[]>(state => state.list.songsDemo);
@@ -35,10 +35,10 @@ export const useAddTrack = () => {
                 const songsCompare: Track[] = listSongs.map(item => ({
                     id: `${item.uuid}`,
                     url: '',
-                    type: 'default',
                     title: item.title,
                     artist: item.description || item.title,
                     artwork: item.thumb,
+                    duration: item.time,
                 }));
 
                 const listDiff = differenceBy(songsCompare, listPlays, 'id');
@@ -54,10 +54,12 @@ export const useAddTrack = () => {
                     await TrackPlayer.add(
                         listNewSongsDemo.map(i => ({ ...i, ...(isLogin && { headers: { token } }) })),
                     );
+
+                    dispatch(actionsHome.getQueue());
                 }
             }
         },
-        [isLogin, token],
+        [dispatch, isLogin, token],
     );
 
     const addPlayDemo = useCallback(async () => {
@@ -85,24 +87,4 @@ export const useAddTrack = () => {
     useEffect(() => {
         addPlayDemo();
     }, [addPlayDemo]);
-
-    const checkTime = useCallback(async () => {
-        const currentTrack = await TrackPlayer.getCurrentTrack();
-
-        if (currentTrack) {
-            const [queue, track] = await Promise.all([TrackPlayer.getQueue(), TrackPlayer.getTrack(currentTrack)]);
-
-            if (position > duration) {
-                if (last(queue)?.id === track.id) {
-                    await TrackPlayer.stop();
-                } else {
-                    await TrackPlayer.skipToNext();
-                }
-            }
-        }
-    }, [duration, position]);
-
-    useEffect(() => {
-        checkTime();
-    }, [checkTime]);
 };

@@ -26,7 +26,7 @@ const EditProfileScreen: FC<IProps> = ({ navigation }) => {
     const dispatch = useDispatch();
     const user = useSelector<RootState, User>(state => state.auth.user);
     const isLogin = useSelector<RootState, boolean>(state => state.auth.isLogin);
-    const [name, setName] = useState<string>(user.info.fullname);
+    const [name, setName] = useState<string>('');
     const [sourceImage, setSourceImage] = useState<ImageSourcePropType>();
     const [loading, setLoading] = useState<boolean>(false);
 
@@ -36,12 +36,17 @@ const EditProfileScreen: FC<IProps> = ({ navigation }) => {
         StatusBar.setBarStyle('dark-content', true);
     }, []);
 
+    useEffect(() => {
+        setName(user.info.fullname);
+    }, [user]);
+
     useFocusEffect(changeStatusBar);
 
     const updateAvatar = useCallback(
         async (response: Image) => {
+            setLoading(true);
             try {
-                await dispatch<any>(
+                const res = await dispatch<any>(
                     actionsAuth.updateAvatar({
                         uri: response.path,
                         height: response.height,
@@ -51,7 +56,7 @@ const EditProfileScreen: FC<IProps> = ({ navigation }) => {
                         name: response.filename ? response.filename : `${user.info.uuid}.png`,
                     }),
                 ).then(unwrapResult);
-                debounce(() => Alert.alert('Thông báo', 'Chỉnh sửa ảnh thành công'), 500)();
+                setSourceImage({ uri: res.avatar });
             } catch {
                 debounce(() => Alert.alert('Thông báo', 'Chỉnh sửa ảnh lỗi'), 500)();
             } finally {
@@ -104,17 +109,15 @@ const EditProfileScreen: FC<IProps> = ({ navigation }) => {
                 loadingLabelText: 'Loading...',
                 cropperCancelText: 'Đóng',
                 cropperChooseText: 'Chọn',
-                compressImageQuality: 1,
+                compressImageQuality: 0.7,
             };
 
             if (index === 0) {
-                ImagePicker.openCamera(options).then(response => {
-                    setSourceImage({ uri: response.path });
+                ImagePicker.openCamera(options).then(async response => {
                     updateAvatar(response);
                 });
             } else if (index === 1) {
-                ImagePicker.openPicker(options).then(response => {
-                    setSourceImage({ uri: response.path });
+                ImagePicker.openPicker(options).then(async response => {
                     updateAvatar(response);
                 });
             }

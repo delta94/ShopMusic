@@ -1,7 +1,7 @@
 /* eslint-disable no-bitwise */
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { Icon, Slider, Button } from 'react-native-elements';
+import { Icon, Button, Slider } from 'react-native-elements';
 import TrackPlayer, { useTrackPlayerProgress, Track } from 'react-native-track-player';
 import { useSelector } from 'react-redux';
 import last from 'lodash/last';
@@ -16,29 +16,42 @@ const Palyer = () => {
     const { checkPlay, togglePlayback } = usePlay();
     const { duration, position } = useTrackPlayerProgress();
 
+    const [value, setValue] = useState<number>(0);
+
+    useEffect(() => {
+        setValue(Math.round(position));
+    }, [position]);
+
     const track = useSelector<RootState, Track>(state => state.home.track);
     const queue = useSelector<RootState, Track[]>(state => state.home.queue);
 
     const skipToNext = useCallback(async () => {
         await TrackPlayer.skipToNext();
+        await TrackPlayer.play();
     }, []);
 
     const skipToPrevious = useCallback(async () => {
         await TrackPlayer.skipToPrevious();
+        await TrackPlayer.play();
     }, []);
 
-    const onValueChange = useCallback((value: number) => {
-        TrackPlayer.seekTo(value);
+    const onValueChange = useCallback(async (number: number) => {
+        setValue(Math.round(number));
+        await TrackPlayer.seekTo(Math.round(number));
+        await TrackPlayer.play();
     }, []);
 
     return (
         <View>
             <View style={styles.viewSlider}>
                 <Slider
-                    value={position}
+                    value={value}
                     minimumValue={0}
+                    step={1}
+                    animateTransitions
+                    allowTouchTrack
                     onValueChange={onValueChange}
-                    maximumValue={duration}
+                    maximumValue={track.duration}
                     minimumTrackTintColor={Colors.primary}
                     thumbStyle={styles.thumbStyle}
                 />

@@ -15,6 +15,7 @@ import { Colors } from 'styles/global.style';
 import { actions as actionsAuth } from '../../store';
 import { RootState } from 'store';
 import ImageCustom from 'components/ImageCustom';
+import { User } from 'types/Auth/AuthResponse';
 
 const validationSchema = Yup.object({
     username: Yup.string().required('Vui lòng nhập email').email('Không đúng định dạng email'),
@@ -30,6 +31,7 @@ interface IProps {
 const LoginScreen: FC<IProps> = ({ navigation }) => {
     const dispatch = useDispatch();
     const isLogin = useSelector<RootState, boolean>(state => state.auth.isLogin);
+    const user = useSelector<RootState, User>(state => state.auth.user);
 
     const [loading, setLoading] = useState<boolean>(false);
 
@@ -47,14 +49,20 @@ const LoginScreen: FC<IProps> = ({ navigation }) => {
     }, [isLogin, navigation]);
 
     const onSubmitForm = useCallback(
-        async valuesForm => {
+        async (valuesForm: typeof initialValues) => {
             setLoading(true);
             try {
                 const firebase_token = await messaging().getToken();
-                await dispatch<any>(actionsAuth.login({ ...valuesForm, firebase_token })).then(unwrapResult);
+                await dispatch<any>(
+                    actionsAuth.login({
+                        firebase_token,
+                        username: valuesForm.username.trim(),
+                        password: valuesForm.password.trim(),
+                    }),
+                ).then(unwrapResult);
                 navigation.goBack();
-            } catch {
-                debounce(() => Alert.alert('Thông báo', 'Đăng nhập lỗi!'), 500)();
+            } catch ({ message }) {
+                debounce(() => Alert.alert('Thông báo', message || 'Đăng nhập lỗi!'), 500)();
             } finally {
                 setLoading(false);
             }
@@ -62,11 +70,21 @@ const LoginScreen: FC<IProps> = ({ navigation }) => {
         [dispatch, navigation],
     );
 
-    const { submitForm, handleBlur, handleChange, errors, values } = useFormik<typeof initialValues>({
+    const { submitForm, handleBlur, handleChange, errors, values, touched, setFieldValue } = useFormik<
+        typeof initialValues
+    >({
         initialValues,
         validationSchema,
+        validateOnChange: true,
         onSubmit: onSubmitForm,
     });
+
+    useEffect(() => {
+        if (Object.keys(user).length > 0) {
+            setFieldValue('username', user.account);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [user]);
 
     const toggleSecureEntry = useCallback(() => {
         setSecureTextEntry(!secureTextEntry);
@@ -132,7 +150,7 @@ const LoginScreen: FC<IProps> = ({ navigation }) => {
                     label="Email"
                     errorStyle={styles.errorStyle}
                     labelStyle={styles.labelStyle}
-                    errorMessage={errors.username ? errors.username : undefined}
+                    errorMessage={touched.username && errors.username ? errors.username : undefined}
                     onSubmitEditing={onSubmitEditingEmail}
                 />
 
@@ -158,7 +176,7 @@ const LoginScreen: FC<IProps> = ({ navigation }) => {
                     labelStyle={styles.labelStyle}
                     errorStyle={styles.errorStyle}
                     onSubmitEditing={submitForm}
-                    errorMessage={errors.password ? errors.password : undefined}
+                    errorMessage={touched.password && errors.password ? errors.password : undefined}
                 />
 
                 <Button

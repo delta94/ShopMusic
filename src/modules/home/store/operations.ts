@@ -2,9 +2,6 @@ import { createAsyncThunk } from '@reduxjs/toolkit';
 import TrackPlayer from 'react-native-track-player';
 
 import * as services from './services';
-import { HomeResponse } from 'types/Home/HomeResponse';
-
-export const fetchStatistic = createAsyncThunk<HomeResponse>('home/fetchStatistic', () => services.fetchStatistic());
 
 export const playbackState = createAsyncThunk('home/playbackState', () => TrackPlayer.getState());
 

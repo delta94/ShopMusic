@@ -94,7 +94,7 @@ const ItemList: FC<IProsp> = ({ item, type, checked }) => {
                 title="Lựa chọn"
                 options={[
                     type !== 'songs' ? 'Nghe thử' : 'Nghe nhạc',
-                    Number(item.type) === 2 ? (type !== 'songs' ? 'Mua bản nhạc' : 'Mua thêm giờ') : '',
+                    Number(item.type) === 2 ? (type !== 'songs' ? 'Full bản nhạc' : 'Full thêm giờ') : '',
                     'Đóng',
                 ].filter(Boolean)}
                 cancelButtonIndex={type !== 'songs' ? 2 : 1}

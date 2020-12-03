@@ -11,11 +11,8 @@ import MusicScreen from 'modules/music/components';
 import ListScreen from 'modules/list/components';
 import MusicComponent from 'modules/music/components/MusicComponent';
 import { RootState } from 'store';
-import ProfileScreen from 'modules/profile/screens/ProfileScreen';
-import EditProfileScreen from 'modules/profile/screens/EditProfileScreen';
 import { Colors } from 'styles/global.style';
 import NavigationService from 'navigation/NavigationService';
-import { useIOS13 } from 'hooks/useIOS13';
 
 enableScreens();
 const Stack = createNativeStackNavigator();
@@ -23,7 +20,6 @@ const Stack = createNativeStackNavigator();
 const MusicScreenBottomTab = () => {
     const track = useSelector<RootState, Track>(state => state.home.track);
     const isLogin = useSelector<RootState, boolean>(state => state.auth.isLogin);
-    const isIOS13 = useIOS13();
 
     const goToChat = useCallback(() => {
         NavigationService.navigate('ChatScreen');
@@ -54,17 +50,6 @@ const MusicScreenBottomTab = () => {
                     component={MusicScreen}
                 />
                 <Stack.Screen options={{ headerShown: false }} name="ListScreen" component={ListScreen} />
-                <Stack.Screen options={{ headerShown: false }} name="ProfileScreen" component={ProfileScreen} />
-
-                <Stack.Screen
-                    options={{
-                        title: 'Chỉnh sửa thông tin',
-                        headerStyle: { backgroundColor: Colors.white },
-                        headerTintColor: Colors.subtle,
-                    }}
-                    name="EditProfileScreen"
-                    component={EditProfileScreen}
-                />
             </Stack.Navigator>
 
             {Object.keys(track).length > 0 && <MusicComponent />}

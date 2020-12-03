@@ -7,10 +7,7 @@ import App from './App';
 import { name as appName } from './app.json';
 import messaging from '@react-native-firebase/messaging';
 
-LogBox.ignoreLogs([
-    'VirtualizedLists should never be nested', // TODO: Remove when fixed
-    'Non-serializable values were found in the navigation state',
-]);
+LogBox.ignoreAllLogs(true);
 
 messaging().setBackgroundMessageHandler(async remoteMessage => {});
 

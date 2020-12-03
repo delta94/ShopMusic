@@ -13,7 +13,7 @@ export const register = (body: RegisterRequest): Promise<User> =>
             return res.data.data;
         }
 
-        return Promise.reject();
+        return Promise.reject(res.data.message);
     });
 
 export const login = (body: LoginRequest): Promise<LoginInReponse> =>
@@ -24,7 +24,7 @@ export const login = (body: LoginRequest): Promise<LoginInReponse> =>
             return res.data.data;
         }
 
-        return Promise.reject();
+        return Promise.reject(res.data.message);
     });
 
 export const checkLoginAccount = () =>

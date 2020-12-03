@@ -62,7 +62,7 @@ const ListScreen: FC<IProps> = ({ navigation, route }) => {
     const listHeaderComponent = useCallback(
         () => (
             <Text style={styles.textHeaderList}>
-                Danh sách nhạc {type === 'songs' ? 'đã mua' : `nghe thử ${title}`}
+                Danh sách nhạc {type === 'songs' ? 'đã full' : `nghe thử ${title}`}
             </Text>
         ),
         [title, type],
@@ -153,7 +153,7 @@ const ListScreen: FC<IProps> = ({ navigation, route }) => {
 
                 <TouchableOpacity onPress={openModalBuyMore} style={styles.buttonBuyMore}>
                     <Text style={styles.textBuyMore}>
-                        {!selectMultiBuy ? 'Mua nhiều' : listSongSelect.length > 0 ? 'Mua' : 'Huỷ'}
+                        {!selectMultiBuy ? 'Full nhiều' : listSongSelect.length > 0 ? 'Full' : 'Huỷ'}
                     </Text>
                 </TouchableOpacity>
             </View>

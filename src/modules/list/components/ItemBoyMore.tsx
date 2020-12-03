@@ -37,15 +37,15 @@ const ItemBoyMore: FC<IProps> = ({ item, listBuy, setListBuy }) => {
     return (
         <Input
             labelStyle={styles.labelStyle}
-            label={`${item.title} - ${formatPrice(item.cost)}/phút`}
+            label={`${item.title} - ${formatPrice(item.cost || 0)}/phút`}
             returnKeyType="done"
             autoCapitalize="none"
-            keyboardType="number-pad"
+            keyboardType="numeric"
             selectionColor={Colors.subtle}
             value={String(listBuy.find(i => i.uuid === item.uuid)?.time || '')}
             onChangeText={onValueChange}
             style={styles.viewInput}
-            placeholder="Nhập thời gian mua (phút)"
+            placeholder="Nhập thời gian full (phút)"
         />
     );
 };

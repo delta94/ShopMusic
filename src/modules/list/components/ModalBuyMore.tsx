@@ -48,13 +48,13 @@ const ModalBuyMore: FC<IProps> = ({ isVisible, setIsVisible }) => {
     }, [setIsVisible]);
 
     useEffect(() => {
-        setListBuy(listSongSelect.map(item => ({ uuid: item.uuid, cost: item.cost, time: 0 })));
+        setListBuy(listSongSelect.map(item => ({ uuid: item.uuid, cost: item.cost || 0, time: 0 })));
     }, [listSongSelect]);
 
     const totalCost = useMemo(() => {
         const listBuyFilter = listBuy.filter(item => !!item.time);
         if (listBuyFilter.length > 0) {
-            return sumBy(listBuyFilter, o => o.cost * o.time);
+            return sumBy(listBuyFilter, o => o.cost || 0 * o.time);
         }
         return 0;
     }, [listBuy]);
@@ -70,7 +70,7 @@ const ModalBuyMore: FC<IProps> = ({ isVisible, setIsVisible }) => {
                         totalCost,
                         items: listBuyFilter.map(item => ({
                             uuid: item.uuid,
-                            cost: item.cost * item.time,
+                            cost: item.cost || 0 * item.time,
                             time: item.time * 60,
                         })),
                     }),

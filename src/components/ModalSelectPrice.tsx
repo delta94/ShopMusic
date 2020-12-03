@@ -52,7 +52,7 @@ const ModalSelectPrice: FC<IProps> = ({ uuid, isVisible, setIsVisible }) => {
             const res = await dispatch<any>(
                 actionsHome.buySong({
                     time: Number(time) * 60,
-                    cost: detailSong.cost * Number(time),
+                    cost: detailSong.cost || 0 * Number(time),
                     uuid: detailSong.uuid,
                 }),
             ).then(unwrapResult);
@@ -104,7 +104,7 @@ const ModalSelectPrice: FC<IProps> = ({ uuid, isVisible, setIsVisible }) => {
                         </Text>
                         <Text>
                             <Text style={styles.textTitlePayment}>Số tiền:</Text>{' '}
-                            {formatPrice(Number(time) * detailSong.cost)}
+                            {formatPrice(Number(time) * detailSong.cost || 0)}
                         </Text>
 
                         <View style={styles.viewActions}>
@@ -117,15 +117,15 @@ const ModalSelectPrice: FC<IProps> = ({ uuid, isVisible, setIsVisible }) => {
                     <Fragment>
                         <Input
                             labelStyle={styles.labelStyle}
-                            label={`${detailSong.title} - ${formatPrice(detailSong.cost)}/phút`}
+                            label={`${detailSong.title} - ${formatPrice(detailSong.cost || 0)}/phút`}
                             returnKeyType="done"
                             autoCapitalize="none"
-                            keyboardType="number-pad"
+                            keyboardType="numeric"
                             selectionColor={Colors.subtle}
                             value={time}
                             onChangeText={setTime}
                             style={styles.viewInput}
-                            placeholder="Nhập thời gian mua (phút)"
+                            placeholder="Nhập thời gian full (phút)"
                         />
 
                         <View style={styles.viewActions}>
@@ -137,7 +137,7 @@ const ModalSelectPrice: FC<IProps> = ({ uuid, isVisible, setIsVisible }) => {
                                 disabled={!time}
                                 style={[styles.buttonActions, styles.buttonSuccess]}>
                                 <Text style={styles.textButtonActions}>
-                                    Thanh toán {!!time && formatPrice(Number(time) * detailSong.cost)}
+                                    Thanh toán {!!time && formatPrice(Number(time) * detailSong.cost || 0)}
                                 </Text>
                             </TouchableOpacity>
                         </View>
